@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Everything below is ported verbatim (selector names and values unchanged)
+  from the <style> blocks in the original static mockups, so existing class
+  names like `glass-card`, `primary-gradient`, `text-gradient`, and
+  `animate-float` keep working exactly as they did in the HTML version.
+*/
+
+body {
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  overflow-x: hidden;
+  min-height: max(884px, 100dvh);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 30px rgba(70, 72, 212, 0.08);
+  border-color: rgba(70, 72, 212, 0.2);
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #4648d4 0%, #6b38d4 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #4648d4 0%, #6b38d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.nav-blur {
+  backdrop-filter: blur(20px);
+}
+
+.ai-badge {
+  font-family: "JetBrains Mono", monospace;
+  background: rgba(107, 56, 212, 0.1);
+  color: #6b38d4;
+}
+
+.ai-glow {
+  box-shadow: 0 0 20px rgba(70, 72, 212, 0.15);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.score-gradient {
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #4648d4 0%,
+    #6b38d4 82%,
+    transparent 82%
+  );
+}
+
+.animate-score {
+  animation: score-reveal 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes score-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
