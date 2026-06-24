@@ -2,16 +2,18 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "@/pages/LandingPage";
 import StudentDashboard from "@/pages/StudentDashboard";
 import AtsScoreBreakdown from "@/pages/AtsScoreBreakdown";
+import JobMatchEngine from "@/pages/JobMatchEngine";
 
 /**
  * Route map mirrors the original static mockups:
  *   index.html              -> "/"            (LandingPage)
  *   dashboard mockup         -> "/dashboard"    (StudentDashboard)
  *   ATS score breakdown      -> "/ats-score"    (AtsScoreBreakdown)
- *   job match engine         -> "/job-match"    (JobMatchEngine)     [next PR]
+ *   job match engine         -> "/job-match"    (JobMatchEngine)
  *
- * JobMatchEngine is intentionally not wired yet — that's the next
- * scaffold step so it can be verified before the next one is added.
+ * All four original mockups are now migrated. Routes referenced by the
+ * JobMatchSidebar ("/skill-gap", "/ai-enhancer") are placeholders for
+ * future modules (6 and 7) and are not yet implemented — see README.
  */
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<StudentDashboard />} />
         <Route path="/ats-score" element={<AtsScoreBreakdown />} />
+        <Route path="/job-match" element={<JobMatchEngine />} />
       </Routes>
     </BrowserRouter>
   );
