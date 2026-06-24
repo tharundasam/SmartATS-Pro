@@ -108,6 +108,7 @@ const config: Config = {
         "body-md": ["Inter"],
         "display-xl": ["Inter"],
         "headline-sm": ["Inter"],
+        "headline-sm-mobile": ["Inter"],
         "headline-lg-mobile": ["Inter"],
         "headline-lg": ["Inter"],
         "body-lg": ["Inter"],
@@ -117,6 +118,10 @@ const config: Config = {
       },
       fontSize: {
         "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "headline-sm-mobile": [
+          "20px",
+          { lineHeight: "28px", fontWeight: "600" },
+        ],
         "display-xl": [
           "60px",
           { lineHeight: "72px", letterSpacing: "-0.02em", fontWeight: "700" },

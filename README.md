@@ -5,76 +5,96 @@ React migration of the static `index.html` mockups, built incrementally.
 **Done so far:**
 - Step 1 — Project scaffold + Landing Page
 - Step 2 — Student Dashboard
+- Step 3 — ATS Score Breakdown
 
-**Not yet done:** ATS Score Breakdown, Job Match Engine, backend wiring.
+**Not yet done:** Job Match Engine, backend wiring.
 
 ## What's in this scaffold
 
 - Vite + React 18 + TypeScript (strict mode)
 - Tailwind CSS, config ported **exactly** from the original `tailwind.config`
-  blocks in `index.html` (every color, spacing, fontFamily, fontSize token —
-  unchanged), plus one intentional fix — see "Deviations" below
+  blocks in `index.html` (every color, spacing, fontFamily, fontSize token),
+  plus fixes for tokens the original HTML referenced but never defined —
+  see "Deviations" below
 - ShadCN CLI config (`components.json`) ready to use — no components
   installed yet, added as each page needs them
-- React Router with routes for `/` (Landing) and `/dashboard` (Student
-  Dashboard); `/ats-score` and `/job-match` reserved for upcoming pages
+- React Router with routes for `/` (Landing), `/dashboard` (Student
+  Dashboard), and `/ats-score` (ATS Score Breakdown); `/job-match` reserved
+  for the next page
 
 ### Pages
 
 - **`LandingPage.tsx`** — hero, animated stats, bento feature grid,
-  "how it works", final CTA. Pixel-for-pixel match of the original markup.
+  "how it works", final CTA.
 - **`StudentDashboard.tsx`** — welcome banner, 4 KPI cards, ATS evolution
   bar chart, skill profile spider chart, recent uploads feed, recommended
-  actions. Same markup/classes as the original, now driven by typed mock
-  data (`src/lib/mockDashboardData.ts`) instead of hardcoded JSX values.
+  actions.
+- **`AtsScoreBreakdown.tsx`** — circular score gauge, critical insight
+  panel, job fit / ATS rank stats, 5 metric breakdown cards (Skills,
+  Formatting, Keywords, Education, Projects) plus an "Add Comparison"
+  placeholder card.
+
+All three are driven by typed mock data (`src/lib/mock*.ts`) rather than
+hardcoded JSX values, so each is a one-file swap once its backend endpoint
+exists.
 
 ### Shared layout
 
-- `TopAppBar` — landing page header (reused if other marketing-style pages
-  are added later)
-- `DashboardHeader` — the dashboard's distinct header variant (hamburger +
-  wordmark, Dashboard/Jobs/Learning links) — kept separate from `TopAppBar`
-  since the original used two different header designs across pages
-- `BottomNavBar` — mobile nav, shared across all pages, active state now
-  driven by real route matching (`NavLink`) instead of a click listener
-  that just toggled CSS classes
+- `TopAppBar` — landing page header
+- `DashboardHeader` — dashboard's header variant (hamburger + wordmark,
+  Dashboard/Jobs/Learning links)
+- `AtsScoreHeader` — ATS Score page's header variant (back button + page
+  title, smaller avatar)
+- `BottomNavBar` — mobile nav, shared across all pages, active state
+  driven by real route matching (`NavLink`)
+
+The original design used three distinct header layouts across its four
+pages, so each is its own component rather than one over-configured
+shared header.
 
 ### Hooks
 
-- `useCountUp` — replaces the original vanilla-JS `IntersectionObserver`
-  counter animation (Landing page stats)
-- `useStaggeredReveal` — replaces the original dashboard script that faded
-  in every `.glass-card` with a 100ms stagger per card, in DOM order
+- `useCountUp` — Landing page stat counters
+- `useStaggeredReveal` — Dashboard's staggered glass-card fade-in
+- `useAnimatedWidth` — ATS Score page's progress bars animating from 0%
+  to their real width 100ms after mount
 
 ### Types
 
-- `src/types/dashboard.ts` defines `DashboardSummary` and `ResumeUpload` —
-  these mirror the shape the future `GET /api/dashboard/summary` endpoint
-  (Module 10) will return, so swapping mock data for a real fetch later is
-  a one-file change, not a rewrite.
+- `src/types/dashboard.ts` — `DashboardSummary`, `ResumeUpload`
+- `src/types/atsScore.ts` — `AtsScoreSummary`, `AtsMetric`
+
+Both mirror the shape their future backend endpoints will return (Modules
+4 and 10), so swapping mock data for a real fetch is a one-file change.
 
 ## Deviations from the original HTML (and why)
 
-- **Decorative images removed.** The original `<img>` placeholders pointed
-  at temporary Google-hosted demo URLs (`lh3.googleusercontent.com/aida-public/...`),
-  not real assets. User avatars are now optional props
-  (`<DashboardHeader avatarUrl="..." />`); the one decorative analysis image
-  on the landing page is a gradient placeholder pending a real asset.
-- **`headline-lg-mobile` token added (bug fix, by request).** The original
-  HTML referenced `font-headline-lg-mobile` / `text-headline-lg-mobile` on
-  the dashboard's "Welcome back" heading and the Job Match page's heading,
-  but this class was never defined in any of the four `tailwind.config`
-  blocks in the source file — a latent bug that silently fell back to
-  default browser sizing on mobile. Fixed in `tailwind.config.ts`: defined
-  as 28px/36px line-height, between `headline-sm` (24px) and `headline-lg`
-  (32px).
-- **Dynamic Tailwind class generation avoided.** The dashboard's ATS
-  Evolution chart originally hardcoded 6 bars with manually-chosen opacity
-  classes (`bg-primary/10` through `/80`). Rather than interpolate
-  `bg-primary/${value}` at runtime — which Tailwind cannot detect at build
-  time since it scans for literal strings — `AtsEvolutionChart.tsx` uses a
-  static lookup array of literal class names, preserving the exact same
-  visual progression.
+- **Decorative images removed.** Original `<img>` placeholders pointed at
+  temporary Google-hosted demo URLs, not real assets. Avatars are now
+  optional props on each header component.
+- **Three undefined Tailwind tokens fixed.** The original HTML referenced
+  `headline-lg-mobile`, `headline-sm-mobile`, and used `display-xl-mobile`
+  inconsistently across its four embedded `tailwind.config` blocks — some
+  pages defined tokens others didn't. `headline-lg-mobile` and
+  `headline-sm-mobile` were never defined in *any* of the four configs,
+  so on the original static pages those classes silently fell back to
+  default browser sizing. Per explicit decision, these are fixed rather
+  than reproduced as bugs:
+  - `headline-lg-mobile`: 28px / 36px line-height (between `headline-sm`
+    24px and `headline-lg` 32px)
+  - `headline-sm-mobile`: 20px / 28px line-height (between `body-lg` 18px
+    and `headline-sm` 24px)
+- **Dynamic Tailwind class generation avoided.** Both the dashboard's ATS
+  Evolution chart and the ATS Score page's metric cards originally
+  hardcoded per-item color/opacity classes inline. Interpolating a class
+  name at runtime (e.g. `` `bg-${color}/10` ``) doesn't work with Tailwind,
+  since it scans source for literal strings at build time — not actual
+  runtime values. Both components instead use a static lookup object
+  mapping each known variant to its literal class strings.
+- **ATS Score back button is now functional.** The original was a static
+  decorative arrow icon with no behavior. `AtsScoreHeader` wires it to
+  `useNavigate(-1)` (browser back), since a non-functional back button in
+  a real app would be a regression, not a faithful port.
 - Tailwind is compiled via PostCSS, not the CDN script (CDN Tailwind isn't
   meant for production builds).
 
@@ -88,8 +108,10 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/` for the Landing Page and
-`http://localhost:5173/dashboard` for the Student Dashboard.
+Routes:
+- `/` — Landing Page
+- `/dashboard` — Student Dashboard
+- `/ats-score` — ATS Score Breakdown
 
 The Vite config proxies `/api/*` to `http://localhost:8000`, so once the
 FastAPI backend exists, frontend calls to `/api/...` reach it without CORS
@@ -102,32 +124,31 @@ npm run build
 npm run preview
 ```
 
-## Testing instructions for this step
+## Testing instructions for Step 3 (ATS Score Breakdown)
 
 1. `npm install && npm run dev`
-2. Open `http://localhost:5173/dashboard`
-3. Check against the original dashboard mockup:
-   - Welcome banner shows "Welcome back, Alex" / "Top 15%"
-   - 4 KPI cards (ATS Score 82, Resume Strength High, Job Matches 12,
-     Missing Skills 3) fade in with a staggered animation on page load
-   - ATS Evolution bar chart shows 6 bars (Oct 1 → Dec 15) with hover
-     tooltips showing the score value
-   - Skill Profile spider-chart visual + 3 skill badges (92% Python, 78%
-     AWS, 45% React)
-   - Recent Uploads list shows 3 resumes with correct status badges
-     (PROCESSED / PROCESSED / LOW MATCH) and score colors
-   - "Run Analysis" and "Upload New Resume" buttons log to the browser
-     console (not wired to real actions yet — that's Phase B/C)
-   - Bottom nav (mobile width) correctly highlights "Home" when on
-     `/dashboard`, since there's no literal `/dashboard` nav item — this
-     matches the original, which always showed "Home" as active on this
-     page
-4. Resize to mobile width and confirm responsive behavior matches the
-   original (KPI grid 2-column, bottom nav visible, top nav collapses)
+2. Open `http://localhost:5173/ats-score`
+3. Check against the original ATS Score Breakdown mockup:
+   - Header shows a back arrow + "ATS Score Breakdown" title; clicking
+     the back arrow navigates to the previous page in browser history
+   - Circular gauge shows **82** in the center with "Score / 100" below,
+     and the ring fill visually matches an 82% arc (not a full circle,
+     not near-empty)
+   - "AI ANALYZED" pill + "performing better than 74% of applicants" text
+   - Critical Insight card (left border accent) shows the keyword-density
+     message and an "Improve Keywords" button (currently logs to console)
+   - Job Fit: **High**, ATS Rank: **Top 5%** in the two small stat cards
+   - "Metric Breakdown" section shows 5 cards: Skills Score (75%),
+     Formatting (95%), Keywords (60%, with red/error border treatment),
+     Education (100%), Projects (80%) — each with a progress bar that
+     animates from 0% to its target width shortly after the page loads
+   - A 6th dashed "Add Comparison" placeholder card appears after the 5
+     metric cards
+4. Resize to mobile width and confirm the layout matches the original
+   (single column metric cards, gauge stacks above the insight panel)
 5. Run `npm run build` and confirm it completes with no TypeScript errors
 
 ## Next steps
 
-- Migrate ATS Score Breakdown page
 - Migrate Job Match Engine page
 - Wire pages to backend once Phase B (FastAPI) starts
