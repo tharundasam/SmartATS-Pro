@@ -1,0 +1,54 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+# Bumped from 2.0.35 -> 2.0.44: greenlet (a default sub-dependency) only
+# got Python 3.14 wheels starting around SQLAlchemy 2.0.44. Below that,
+# pip tries to build greenlet from source, which needs a C compiler.
+sqlalchemy==2.0.44
+# Bumped from 2.9.2 -> 2.12.0: pydantic-core (Rust-based) only reached
+# stable Python 3.14 wheel support at pydantic 2.12. Below that, pip
+# tries to build pydantic-core from source, which needs Rust/Cargo —
+# this would have been the very next failure after spaCy.
+pydantic==2.12.0
+pydantic-settings==2.7.0
+python-dotenv==1.0.1
+python-multipart==0.0.12
+
+# Auth (NOT installed yet — deferred to Phase B Step 2 by design)
+# Two things to resolve when that step is built, not now:
+#   1. passlib is unmaintained; its bcrypt handler breaks against
+#      bcrypt>=4.1's API change, which was never patched upstream.
+#      bcrypt only ships Python 3.14 wheels from 5.0.0+, which is exactly
+#      the broken combination. Step 2 will hash passwords with the
+#      `bcrypt` library directly (or `argon2-cffi`) instead of passlib.
+#   2. python-jose's pinned `cryptography` sub-dependency should be
+#      re-checked against whatever `cryptography` version is current
+#      when Step 2 is built — `cryptography` itself publishes 3.14
+#      wheels today via the abi3 stable ABI, so this is likely fine, but
+#      worth confirming with a real `pip install` rather than assuming.
+# python-jose[cryptography]==3.3.0
+# passlib[bcrypt]==1.7.4
+
+# Resume parsing (used starting Phase B Step 4)
+# Pure-Python text extraction only — no spaCy here. spaCy's dependencies
+# (thinc, blis) are C-extension packages with no prebuilt wheels yet for
+# Python 3.14 (released Oct 2025), so pip falls back to compiling from
+# source, which needs Visual Studio Build Tools on Windows. Until spaCy
+# (or an alternative) ships 3.14 wheels, extraction here is regex/string-
+# based — see app/ai_engine for the rule-based approach.
+pdfplumber==0.11.4
+pypdf==5.0.1
+python-docx==1.1.2
+
+# NOTE: NLP/ML stack (spaCy, sentence-transformers, scikit-learn, nltk)
+# intentionally removed for now per project decision — all four pull in
+# C-extension dependencies (thinc/blis, torch, scipy/numpy-adjacent
+# compiled wheels) that aren't yet reliably prebuilt for Python 3.14 on
+# Windows. ATS scoring and JD matching use rule-based / keyword-overlap
+# logic instead (see app/ai_engine/rule_based.py once Phase C lands).
+# Revisit this block once either (a) these packages ship 3.14 wheels, or
+# (b) the project is run on Python 3.11/3.12 instead, where all of them
+# already have wheels today.
+
+# Testing
+pytest==8.3.3
+httpx==0.27.2
