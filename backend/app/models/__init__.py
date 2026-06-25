@@ -1,6 +1,6 @@
 # SQLAlchemy ORM models live here, one file per table, added module by
 # module:
-#   - users.py, roles.py        -> Module 1 (Phase B Step 2: Auth)
+#   - users.py                   -> Module 1 (Phase B Step 2: Auth)  ✅ done
 #   - resumes.py                 -> Module 2 (Phase B Step 3: Resume Upload)
 #   - extracted_resume_data.py   -> Module 3 (Resume Parsing)
 #   - ats_reports.py             -> Module 4 (ATS Score Engine)
@@ -10,6 +10,9 @@
 #   - career_recommendations.py  -> Module 9
 #   - placement_analytics.py     -> Module 10
 #
-# Intentionally empty for this step — there are no tables yet, only the
-# engine/session plumbing and the /health endpoint that proves the DB
-# file can be created and connected to.
+# Every model module must be imported here (even if unused directly) so
+# that Base.metadata.create_all() in main.py's startup hook actually
+# knows about the table and creates it. Forgetting this import is a
+# common and confusing bug — the table silently doesn't get created.
+from app.models.user import RoleEnum, User  # noqa: F401
+

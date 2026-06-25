@@ -17,6 +17,14 @@ from app.core.config import get_settings
 from app.database.session import Base, engine
 from app.schemas.health import RootResponse
 
+# Importing app.models registers every ORM model's table on Base.metadata.
+# Without this import, Base.metadata.create_all() below would create zero
+# tables — SQLAlchemy only knows about classes that have actually been
+# imported somewhere in the process. Every future model module must be
+# re-exported from app/models/__init__.py to stay covered by this single
+# import.
+from app import models  # noqa: F401
+
 settings = get_settings()
 
 app = FastAPI(

@@ -10,23 +10,20 @@ sqlalchemy==2.0.44
 # this would have been the very next failure after spaCy.
 pydantic==2.12.0
 pydantic-settings==2.7.0
+# Required for pydantic's EmailStr type (used in app/schemas/auth.py).
+# Pydantic does not bundle this — it's a separate install.
+email-validator==2.2.0
 python-dotenv==1.0.1
 python-multipart==0.0.12
 
-# Auth (NOT installed yet — deferred to Phase B Step 2 by design)
-# Two things to resolve when that step is built, not now:
-#   1. passlib is unmaintained; its bcrypt handler breaks against
-#      bcrypt>=4.1's API change, which was never patched upstream.
-#      bcrypt only ships Python 3.14 wheels from 5.0.0+, which is exactly
-#      the broken combination. Step 2 will hash passwords with the
-#      `bcrypt` library directly (or `argon2-cffi`) instead of passlib.
-#   2. python-jose's pinned `cryptography` sub-dependency should be
-#      re-checked against whatever `cryptography` version is current
-#      when Step 2 is built — `cryptography` itself publishes 3.14
-#      wheels today via the abi3 stable ABI, so this is likely fine, but
-#      worth confirming with a real `pip install` rather than assuming.
-# python-jose[cryptography]==3.3.0
-# passlib[bcrypt]==1.7.4
+# Auth (Phase B Step 2)
+# passlib is unmaintained and its bcrypt handler breaks against
+# bcrypt>=4.1's API change (which was never patched upstream), so this
+# project hashes passwords with the `bcrypt` library directly instead.
+bcrypt==4.2.0
+# cryptography ships Python 3.14 wheels via the abi3 stable ABI, so
+# python-jose installs cleanly here.
+python-jose[cryptography]==3.3.0
 
 # Resume parsing (used starting Phase B Step 4)
 # Pure-Python text extraction only — no spaCy here. spaCy's dependencies

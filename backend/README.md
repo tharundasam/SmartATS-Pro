@@ -5,7 +5,7 @@ No business logic yet — auth, resume upload, parsing, ATS scoring, etc.
 come in subsequent steps. This step exists to prove the foundation works
 before anything is built on top of it.
 
-## What's included
+## What's included (Phase B Step 1 + Step 2)
 
 ```
 backend/
@@ -15,24 +15,30 @@ backend/
 │   │   └── config.py        # Settings loaded from .env (pydantic-settings)
 │   ├── database/
 │   │   └── session.py       # SQLAlchemy engine/session, get_db() dependency
+│   ├── models/
+│   │   └── user.py          # User model + RoleEnum (student/recruiter/placement_officer)
+│   ├── schemas/
+│   │   ├── health.py        # Pydantic response models for health/root
+│   │   └── auth.py          # Register/login/token/user-out schemas
+│   ├── auth/
+│   │   ├── security.py      # bcrypt hashing, JWT create/decode
+│   │   └── dependencies.py  # get_current_user, require_role(...)
+│   ├── services/
+│   │   └── auth_service.py  # Registration/login business logic
 │   ├── api/
 │   │   └── v1/
 │   │       ├── __init__.py  # api_router — every module's routes plug in here
-│   │       └── health.py    # GET /api/v1/health
-│   ├── schemas/
-│   │   └── health.py        # Pydantic response models for health/root
-│   ├── models/               # (empty — real ORM models start Module 1)
-│   ├── services/             # (empty — business logic layer, module by module)
-│   ├── auth/                 # (empty — JWT/password hashing, Phase B Step 2)
-│   ├── ai_engine/             # (empty — parsing/scoring/matching, Phase B Step 4+)
+│   │       ├── health.py    # GET /api/v1/health
+│   │       └── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
+│   ├── ai_engine/             # (empty — parsing/scoring, Phase B Step 4+)
 │   └── utils/                 # (empty — shared helpers, added as needed)
 ├── tests/
-│   └── test_health.py        # Automated tests for root + health endpoints
-├── storage/resumes/           # Local file storage for uploaded resumes (Step 3+)
+│   ├── test_health.py
+│   └── test_auth.py          # 9 tests covering register/login/me/RBAC
+├── storage/resumes/
 ├── requirements.txt
-├── .env.example                # Template — copy to .env
-├── .env                        # Already created for you with working defaults
-└── .gitignore
+├── .env / .env.example
+└── README.md
 ```
 
 ## Why this structure
@@ -135,12 +141,77 @@ there. Please run the steps above and report back anything that fails
 (a traceback, a wrong status code, an import error) and it'll be fixed
 immediately before moving to Step 2.
 
+## Testing instructions — Phase B Step 2 (Authentication)
+
+1. **Restart the server** if it's already running, so the new `users`
+   table gets created:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+2. **Confirm the table was created:**
+   ```bash
+   python -c "import sqlite3; print(sqlite3.connect('smartats.db').execute(\"SELECT name FROM sqlite_master WHERE type='table'\").fetchall())"
+   ```
+   Should include `('users',)`.
+
+3. **Register a user via Swagger UI** (http://localhost:8000/docs):
+   - Expand `POST /api/v1/auth/register`, "Try it out"
+   - Body:
+     ```json
+     {"full_name": "Alex Rivers", "email": "alex@example.com", "password": "supersecret123", "role": "student"}
+     ```
+   - Expect `201`, with `access_token` and a `user` object in the response.
+
+4. **Use Swagger's "Authorize" button** (top right, padlock icon):
+   - username: `alex@example.com`, password: `supersecret123`
+   - This hits `/auth/login` under the hood (OAuth2 form flow) and stores
+     the token for all subsequent "Try it out" calls automatically.
+
+5. **Call `GET /api/v1/auth/me`** via "Try it out" — should return Alex's
+   profile without you manually pasting a token anywhere.
+
+6. **Test role protection:**
+   - With Alex (a student) still authorized, call
+     `GET /api/v1/auth/placement-officer-check` — expect `403`.
+   - Register a second user with `"role": "placement_officer"`,
+     re-authorize as that user, call the same endpoint — expect `200`.
+
+7. **Test from curl directly (JSON login variant):**
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/auth/login/json \
+     -H "Content-Type: application/json" \
+     -d '{"email": "alex@example.com", "password": "supersecret123"}'
+   ```
+
+8. **Run the automated test suite:**
+   ```bash
+   pytest -v
+   ```
+   13 tests total should pass (4 from Step 1, 9 new in `test_auth.py`),
+   covering registration, duplicate-email rejection, both login styles,
+   `/me` with and without a token, and both sides of the role check.
+
+## A note on the JWT secret
+
+`.env` ships with a real randomly-generated value for `JWT_SECRET_KEY`
+(not the placeholder string), so auth works immediately without any
+manual setup step. That said, **this exact value should never be reused
+in a real deployment** — `.env` is gitignored specifically so secrets
+like this don't end up in version control. Generate a fresh one for
+production with:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+
 ## Next steps
 
-- **Phase B Step 2:** Authentication (JWT, roles, Users/Roles tables) —
-  using `bcrypt` directly or `argon2-cffi` for password hashing instead
-  of `passlib` (see note in `requirements.txt`)
-- **Phase B Step 3:** Resume upload API (PDF/DOCX, validation, storage)
+- ~~**Phase B Step 2:** Authentication~~ ✅ done (this step) — JWT, roles,
+  bcrypt hashing, `get_current_user`/`require_role` dependencies
+- **Phase B Step 3:** Resume upload API (PDF/DOCX, validation, storage) —
+  will use `Depends(get_current_user)` to associate uploads with the
+  logged-in student
 - **Phase B Step 4:** Resume parsing engine — text extraction via
   pdfplumber/pypdf/python-docx, entity extraction via rule-based
   regex/keyword matching (no spaCy for now)
