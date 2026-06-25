@@ -5,7 +5,7 @@ No business logic yet — auth, resume upload, parsing, ATS scoring, etc.
 come in subsequent steps. This step exists to prove the foundation works
 before anything is built on top of it.
 
-## What's included (Phase B Step 1 + Step 2)
+## What's included (Phase B Step 1 + Step 2 + Step 3)
 
 ```
 backend/
@@ -16,26 +16,32 @@ backend/
 │   ├── database/
 │   │   └── session.py       # SQLAlchemy engine/session, get_db() dependency
 │   ├── models/
-│   │   └── user.py          # User model + RoleEnum (student/recruiter/placement_officer)
+│   │   ├── user.py          # User model + RoleEnum (student/recruiter/placement_officer)
+│   │   └── resume.py        # Resume model — versioned, tied to a user
 │   ├── schemas/
 │   │   ├── health.py        # Pydantic response models for health/root
-│   │   └── auth.py          # Register/login/token/user-out schemas
+│   │   ├── auth.py          # Register/login/token/user-out schemas
+│   │   └── resume.py        # Resume upload/list/out schemas
 │   ├── auth/
 │   │   ├── security.py      # bcrypt hashing, JWT create/decode
 │   │   └── dependencies.py  # get_current_user, require_role(...)
 │   ├── services/
-│   │   └── auth_service.py  # Registration/login business logic
+│   │   ├── auth_service.py  # Registration/login business logic
+│   │   └── resume_service.py # File storage, versioning, list/get/delete
+│   ├── utils/
+│   │   └── file_validation.py # Extension/size/magic-byte checks
 │   ├── api/
 │   │   └── v1/
 │   │       ├── __init__.py  # api_router — every module's routes plug in here
 │   │       ├── health.py    # GET /api/v1/health
-│   │       └── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
-│   ├── ai_engine/             # (empty — parsing/scoring, Phase B Step 4+)
-│   └── utils/                 # (empty — shared helpers, added as needed)
+│   │       ├── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
+│   │       └── resumes.py   # /resumes/upload, /resumes, /resumes/{id}, /resumes/{id}/download
+│   └── ai_engine/             # (empty — parsing/scoring, Phase B Step 4+)
 ├── tests/
 │   ├── test_health.py
-│   └── test_auth.py          # 9 tests covering register/login/me/RBAC
-├── storage/resumes/
+│   ├── test_auth.py
+│   └── test_resumes.py       # 11 tests covering upload, validation, versioning, isolation
+├── storage/resumes/           # Uploaded files land here (gitignored contents)
 ├── requirements.txt
 ├── .env / .env.example
 └── README.md
@@ -205,13 +211,61 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
 
+## Testing instructions — Phase B Step 3 (Resume Upload)
+
+1. **Restart the server** so the new `resumes` table gets created.
+
+2. **Get a token** (register or login via Swagger, or reuse one from
+   Step 2's testing).
+
+3. **Upload a resume via Swagger UI:**
+   - Expand `POST /api/v1/resumes/upload`, "Try it out"
+   - Click "Choose File", pick any real `.pdf` or `.docx` on your machine
+   - Execute — expect `201` with `version: 1`, `is_current: true`
+
+4. **Upload a second file** (different file, or the same one again) —
+   expect `version: 2`, `is_current: true`.
+
+5. **List your resumes:** `GET /api/v1/resumes` — expect `total: 2`,
+   with the second upload's `is_current` true and the first's false.
+
+6. **Download a resume:** `GET /api/v1/resumes/{resume_id}/download` —
+   should return the actual file bytes (Swagger will offer to download
+   it).
+
+7. **Cross-user isolation:** register a second account, authorize as
+   that user, try `GET /api/v1/resumes/{first_users_resume_id}` — expect
+   `404` (not 403 — this avoids confirming the resume exists at all to
+   someone who doesn't own it).
+
+8. **Validation checks** (all via "Try it out" with a deliberately wrong
+   file):
+   - Upload a `.txt` or `.exe` file → expect `400` ("Unsupported file type")
+   - Rename a `.txt` file to `.pdf` and upload it → expect `400`
+     ("File content does not match a valid PDF") — this is the
+     magic-byte check catching a mismatched extension
+   - Upload a file larger than 10MB → expect `413`
+
+9. **Delete and version promotion:** delete your current (most recent)
+   resume via `DELETE /api/v1/resumes/{resume_id}` — expect `204`, then
+   `GET /api/v1/resumes` again and confirm the next-most-recent version
+   automatically became `is_current: true`.
+
+10. **Run the automated test suite:**
+    ```bash
+    pytest -v
+    ```
+    24 tests total should pass (4 health + 9 auth + 11 resume), including
+    the renamed-file-extension attack case and the cross-user isolation
+    check.
+
 ## Next steps
 
-- ~~**Phase B Step 2:** Authentication~~ ✅ done (this step) — JWT, roles,
-  bcrypt hashing, `get_current_user`/`require_role` dependencies
-- **Phase B Step 3:** Resume upload API (PDF/DOCX, validation, storage) —
-  will use `Depends(get_current_user)` to associate uploads with the
-  logged-in student
+- ~~**Phase B Step 2:** Authentication~~ ✅ done — JWT, roles, bcrypt
+  hashing, `get_current_user`/`require_role` dependencies
+- ~~**Phase B Step 3:** Resume upload API~~ ✅ done — PDF/DOCX upload with
+  extension + size + magic-byte validation, versioning, ownership-scoped
+  list/get/download/delete
 - **Phase B Step 4:** Resume parsing engine — text extraction via
   pdfplumber/pypdf/python-docx, entity extraction via rule-based
   regex/keyword matching (no spaCy for now)

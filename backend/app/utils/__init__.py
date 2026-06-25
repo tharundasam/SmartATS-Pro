@@ -1,3 +1,6 @@
-# Cross-cutting helpers with no business logic of their own: file
-# validation, text cleaning, response formatting, pagination helpers,
-# etc. Added as needed starting Phase B Step 3 (file upload validation).
+# Cross-cutting helpers with no business logic of their own.
+#
+#   file_validation.py  -> extension/size/magic-byte checks for resume
+#                           uploads (Phase B Step 3) ✅ done
+#
+# More added as needed: response formatting, pagination helpers, etc.

@@ -1,7 +1,7 @@
 # SQLAlchemy ORM models live here, one file per table, added module by
 # module:
 #   - users.py                   -> Module 1 (Phase B Step 2: Auth)  ✅ done
-#   - resumes.py                 -> Module 2 (Phase B Step 3: Resume Upload)
+#   - resumes.py                 -> Module 2 (Phase B Step 3: Resume Upload)  ✅ done
 #   - extracted_resume_data.py   -> Module 3 (Resume Parsing)
 #   - ats_reports.py             -> Module 4 (ATS Score Engine)
 #   - job_descriptions.py, job_matches.py -> Module 5
@@ -15,4 +15,5 @@
 # knows about the table and creates it. Forgetting this import is a
 # common and confusing bug — the table silently doesn't get created.
 from app.models.user import RoleEnum, User  # noqa: F401
+from app.models.resume import Resume  # noqa: F401
 
