@@ -2,7 +2,7 @@
 # module:
 #   - users.py                   -> Module 1 (Phase B Step 2: Auth)  ✅ done
 #   - resumes.py                 -> Module 2 (Phase B Step 3: Resume Upload)  ✅ done
-#   - extracted_resume_data.py   -> Module 3 (Resume Parsing)
+#   - extracted_resume_data.py   -> Module 3 (Resume Parsing)  ✅ done
 #   - ats_reports.py             -> Module 4 (ATS Score Engine)
 #   - job_descriptions.py, job_matches.py -> Module 5
 #   - skill_gap_reports.py       -> Module 6
@@ -16,4 +16,5 @@
 # common and confusing bug — the table silently doesn't get created.
 from app.models.user import RoleEnum, User  # noqa: F401
 from app.models.resume import Resume  # noqa: F401
+from app.models.extracted_resume_data import ExtractedResumeData  # noqa: F401
 

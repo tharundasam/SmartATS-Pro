@@ -1,11 +1,10 @@
 # SmartATS Pro — Backend (FastAPI)
 
-**Phase B, Step 1: scaffold, SQLite, health check, OpenAPI docs.**
-No business logic yet — auth, resume upload, parsing, ATS scoring, etc.
-come in subsequent steps. This step exists to prove the foundation works
-before anything is built on top of it.
+**Phase B, Steps 1–4: scaffold, auth, resume upload, resume parsing.**
+ATS scoring, JD matching, and the remaining modules come in subsequent
+steps.
 
-## What's included (Phase B Step 1 + Step 2 + Step 3)
+## What's included (Phase B Step 1 + Step 2 + Step 3 + Step 4)
 
 ```
 backend/
@@ -16,36 +15,70 @@ backend/
 │   ├── database/
 │   │   └── session.py       # SQLAlchemy engine/session, get_db() dependency
 │   ├── models/
-│   │   ├── user.py          # User model + RoleEnum (student/recruiter/placement_officer)
-│   │   └── resume.py        # Resume model — versioned, tied to a user
+│   │   ├── user.py                    # User model + RoleEnum
+│   │   ├── resume.py                  # Resume model — versioned, tied to a user
+│   │   └── extracted_resume_data.py   # NEW — parsed fields, 1:1 with Resume
 │   ├── schemas/
 │   │   ├── health.py        # Pydantic response models for health/root
 │   │   ├── auth.py          # Register/login/token/user-out schemas
-│   │   └── resume.py        # Resume upload/list/out schemas
+│   │   ├── resume.py        # ResumeOut, ResumeListResponse, ResumeUploadResponse
+│   │   └── parsing.py        # NEW — ExtractedResumeDataOut
 │   ├── auth/
 │   │   ├── security.py      # bcrypt hashing, JWT create/decode
 │   │   └── dependencies.py  # get_current_user, require_role(...)
+│   ├── ai_engine/
+│   │   ├── text_extraction.py         # NEW — PDF (pdfplumber->pypdf) / DOCX -> raw text
+│   │   └── rule_based_extractor.py    # NEW — raw text -> name/email/phone/skills/sections
 │   ├── services/
-│   │   ├── auth_service.py  # Registration/login business logic
-│   │   └── resume_service.py # File storage, versioning, list/get/delete
+│   │   ├── auth_service.py    # Registration/login business logic
+│   │   ├── resume_service.py  # File storage, versioning, list/get/delete
+│   │   └── parsing_service.py  # NEW — orchestrates extraction, persists result
 │   ├── utils/
 │   │   └── file_validation.py # Extension/size/magic-byte checks
-│   ├── api/
-│   │   └── v1/
-│   │       ├── __init__.py  # api_router — every module's routes plug in here
-│   │       ├── health.py    # GET /api/v1/health
-│   │       ├── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
-│   │       └── resumes.py   # /resumes/upload, /resumes, /resumes/{id}, /resumes/{id}/download
-│   └── ai_engine/             # (empty — parsing/scoring, Phase B Step 4+)
+│   └── api/
+│       └── v1/
+│           ├── __init__.py  # api_router — every module's routes plug in here
+│           ├── health.py    # GET /api/v1/health
+│           ├── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
+│           └── resumes.py   # upload (now auto-parses), list, get, download, delete,
+│                              # NEW: parsed-data, reparse
 ├── tests/
 │   ├── test_health.py
 │   ├── test_auth.py
-│   └── test_resumes.py       # 11 tests covering upload, validation, versioning, isolation
+│   ├── test_resumes.py       # updated this step — see "Breaking change" below
+│   └── test_parsing.py        # NEW — 7 tests covering the extraction pipeline
 ├── storage/resumes/           # Uploaded files land here (gitignored contents)
 ├── requirements.txt
 ├── .env / .env.example
 └── README.md
 ```
+
+## ⚠️ Breaking change in this step: upload response shape
+
+`POST /resumes/upload` no longer returns a flat `ResumeOut` object. It
+now returns:
+
+```json
+{
+  "resume": { "id": "...", "original_filename": "...", "version": 1, "is_current": true, ... },
+  "extracted_data": { "full_name": "...", "email": "...", "skills": [...], ... },
+  "parsing_error": null
+}
+```
+
+instead of the old flat shape (`{"id": ..., "original_filename": ..., ...}`).
+This was necessary to return parsing results from the same call that
+uploads the file, without a second round-trip. If you'd written any
+frontend code against the old shape already, it needs `response.resume.id`
+instead of `response.id` (and so on for every resume field). Nothing in
+the frontend currently calls this endpoint for real yet (see
+`StudentDashboard.tsx`/`JobMatchEngine.tsx` — both have it as a
+`console.log` placeholder), so this is unlikely to have broken anything
+on your side, but flagged here in case.
+
+`test_resumes.py` (from Step 3) was updated to match — every assertion
+that used to read fields directly off the upload response now reads them
+from `response["resume"]` instead.
 
 ## Why this structure
 
@@ -259,6 +292,53 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
     the renamed-file-extension attack case and the cross-user isolation
     check.
 
+## Testing instructions — Phase B Step 4 (Resume Parsing)
+
+1. **Restart the server** so the new `extracted_resume_data` table gets
+   created.
+
+2. **Upload a real PDF or DOCX resume via Swagger UI** (a real one this
+   time — a file with actual text content, not the magic-bytes-only test
+   fixtures used in automated tests):
+   - `POST /api/v1/resumes/upload`, "Try it out", choose your file, Execute
+   - Expect `201`, with the response now shaped as
+     `{"resume": {...}, "extracted_data": {...}, "parsing_error": null}`
+   - Check `extracted_data.skills` contains skills that are actually in
+     your resume and in the keyword list (`app/ai_engine/rule_based_extractor.py`'s
+     `SKILL_KEYWORDS`) — anything not in that list won't be detected,
+     by design (see "A note on the AI/NLP stack" below)
+   - Check `extracted_data.email` and `.full_name` look right
+
+3. **Fetch parsed data separately:**
+   `GET /api/v1/resumes/{resume_id}/parsed-data` — should return the same
+   data as the upload response's `extracted_data`.
+
+4. **Test the graceful-failure path:** upload a PDF that's actually a
+   scanned image (no selectable text) or a corrupted file. Expect `201`
+   still (the resume itself saves fine), with `extracted_data: null` and
+   `parsing_error` describing why parsing failed.
+
+5. **Test reparse:** `POST /api/v1/resumes/{resume_id}/reparse` — should
+   return fresh extraction results read from the stored file on disk
+   (no re-upload needed).
+
+6. **Run the automated test suite:**
+   ```bash
+   pytest -v
+   ```
+   31 tests total should pass (4 health + 9 auth + 11 resume + 7 parsing).
+
+## A note on test fixtures for this step
+
+`test_parsing.py` needed *real* parseable PDF/DOCX content to test
+extraction meaningfully — the existing `FAKE_PDF_BYTES` in
+`test_resumes.py` is just enough to pass the magic-byte check, with no
+actual text. So `test_parsing.py` hand-builds a minimal valid PDF (raw
+PDF syntax, no external library needed) and a real DOCX (via
+`python-docx`, which is already a dependency). These fixture builders
+were verified directly against `pdfplumber`/`pypdf`/`python-docx` before
+being included here, not just written and assumed correct.
+
 ## Next steps
 
 - ~~**Phase B Step 2:** Authentication~~ ✅ done — JWT, roles, bcrypt
@@ -266,9 +346,9 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 - ~~**Phase B Step 3:** Resume upload API~~ ✅ done — PDF/DOCX upload with
   extension + size + magic-byte validation, versioning, ownership-scoped
   list/get/download/delete
-- **Phase B Step 4:** Resume parsing engine — text extraction via
-  pdfplumber/pypdf/python-docx, entity extraction via rule-based
-  regex/keyword matching (no spaCy for now)
+- ~~**Phase B Step 4:** Resume parsing engine~~ ✅ done — text extraction
+  via pdfplumber/pypdf/python-docx, field extraction via regex/keyword
+  matching, auto-runs on upload with graceful failure handling
 - **Phase C:** ATS scoring and JD matching via rule-based keyword
   overlap, not embeddings — see "A note on the AI/NLP stack" below
 
