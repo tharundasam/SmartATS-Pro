@@ -1,10 +1,11 @@
 # SmartATS Pro — Backend (FastAPI)
 
 **Phase B, Steps 1–4: scaffold, auth, resume upload, resume parsing.**
-ATS scoring, JD matching, and the remaining modules come in subsequent
-steps.
+**Phase C: ATS scoring engine (rule-based + stubbed AI suggestions).**
+Remaining modules (JD/job-match persistence, skill-gap reports,
+interview coach, etc.) come in subsequent steps.
 
-## What's included (Phase B Step 1 + Step 2 + Step 3 + Step 4)
+## What's included (Phase B Step 1–4 + Phase C)
 
 ```
 backend/
@@ -17,22 +18,27 @@ backend/
 │   ├── models/
 │   │   ├── user.py                    # User model + RoleEnum
 │   │   ├── resume.py                  # Resume model — versioned, tied to a user
-│   │   └── extracted_resume_data.py   # NEW — parsed fields, 1:1 with Resume
+│   │   ├── extracted_resume_data.py   # Parsed fields, 1:1 with Resume
+│   │   └── ats_report.py              # NEW — one row per scoring run
 │   ├── schemas/
 │   │   ├── health.py        # Pydantic response models for health/root
 │   │   ├── auth.py          # Register/login/token/user-out schemas
 │   │   ├── resume.py        # ResumeOut, ResumeListResponse, ResumeUploadResponse
-│   │   └── parsing.py        # NEW — ExtractedResumeDataOut
+│   │   ├── parsing.py       # ExtractedResumeDataOut
+│   │   └── ats.py            # NEW — ATSScoreRequest, ATSReportOut, ATSReportListResponse
 │   ├── auth/
 │   │   ├── security.py      # bcrypt hashing, JWT create/decode
 │   │   └── dependencies.py  # get_current_user, require_role(...)
 │   ├── ai_engine/
-│   │   ├── text_extraction.py         # NEW — PDF (pdfplumber->pypdf) / DOCX -> raw text
-│   │   └── rule_based_extractor.py    # NEW — raw text -> name/email/phone/skills/sections
+│   │   ├── text_extraction.py         # PDF (pdfplumber->pypdf) / DOCX -> raw text
+│   │   ├── rule_based_extractor.py    # raw text -> name/email/phone/skills/sections
+│   │   ├── rule_based_scorer.py       # NEW — generic + JD-aware ATS scoring
+│   │   └── llm_suggestions.py         # NEW — AI suggestions (STUBBED, no live LLM call)
 │   ├── services/
 │   │   ├── auth_service.py    # Registration/login business logic
 │   │   ├── resume_service.py  # File storage, versioning, list/get/delete
-│   │   └── parsing_service.py  # NEW — orchestrates extraction, persists result
+│   │   ├── parsing_service.py  # Orchestrates extraction, persists result
+│   │   └── ats_service.py      # NEW — orchestrates scoring, persists ATSReport
 │   ├── utils/
 │   │   └── file_validation.py # Extension/size/magic-byte checks
 │   └── api/
@@ -40,13 +46,15 @@ backend/
 │           ├── __init__.py  # api_router — every module's routes plug in here
 │           ├── health.py    # GET /api/v1/health
 │           ├── auth.py      # /auth/register, /auth/login, /auth/login/json, /auth/me
-│           └── resumes.py   # upload (now auto-parses), list, get, download, delete,
-│                              # NEW: parsed-data, reparse
+│           ├── resumes.py   # upload (auto-parses), list, get, download, delete,
+│           │                  # parsed-data, reparse
+│           └── ats.py        # NEW — score, reports (list + single detail)
 ├── tests/
 │   ├── test_health.py
 │   ├── test_auth.py
-│   ├── test_resumes.py       # updated this step — see "Breaking change" below
-│   └── test_parsing.py        # NEW — 7 tests covering the extraction pipeline
+│   ├── test_resumes.py
+│   ├── test_parsing.py        # 7 tests covering the extraction pipeline
+│   └── test_ats.py            # NEW — 10 tests covering the scoring engine
 ├── storage/resumes/           # Uploaded files land here (gitignored contents)
 ├── requirements.txt
 ├── .env / .env.example
@@ -349,8 +357,82 @@ being included here, not just written and assumed correct.
 - ~~**Phase B Step 4:** Resume parsing engine~~ ✅ done — text extraction
   via pdfplumber/pypdf/python-docx, field extraction via regex/keyword
   matching, auto-runs on upload with graceful failure handling
-- **Phase C:** ATS scoring and JD matching via rule-based keyword
-  overlap, not embeddings — see "A note on the AI/NLP stack" below
+- ~~**Phase C:** ATS scoring and JD matching~~ ✅ done — rule-based
+  scoring (generic + JD-aware), with AI suggestions currently stubbed —
+  see "Testing instructions — Phase C" and "A note on AI suggestions
+  (stubbed)" below
+
+## Testing instructions — Phase C (ATS Scoring Engine)
+
+**What's new:** `app/models/ats_report.py` (new `ats_reports` table),
+`app/ai_engine/rule_based_scorer.py`, `app/ai_engine/llm_suggestions.py`
+(stubbed — see note below), `app/services/ats_service.py`,
+`app/schemas/ats.py`, `app/api/v1/ats.py` (mounted at `/api/v1/ats`).
+`tests/test_ats.py` — 10 new tests.
+
+1. **Restart the server** so the new `ats_reports` table gets created.
+
+2. **Upload and parse a resume** (per Phase B Step 4 above) if you
+   don't already have one — scoring requires `extracted_data` to exist.
+
+3. **Generic score (no job description):**
+   - `POST /api/v1/ats/score/{resume_id}`, "Try it out", body `{}`
+   - Expect `201` with `overall_score` plus five sub-scores
+     (`skills_score`, `keywords_score`, `formatting_score`,
+     `education_score`, `projects_score`), an empty `missing_keywords`
+     list, and a non-empty `ai_suggestions` list.
+
+4. **JD-matched score:**
+   - Same endpoint, body `{"job_description": "<paste a real job posting>"}`
+   - Expect `skills_score`/`keywords_score` to differ from the generic
+     run, and `missing_keywords` to list terms from the JD not found in
+     the resume (capped at 10).
+
+5. **Score history:** `GET /api/v1/ats/reports/{resume_id}` — expect
+   `total` to reflect every scoring call made so far for that resume,
+   most recent first. This is what would back a score-over-time trend
+   chart on the frontend.
+
+6. **Single report detail:** `GET /api/v1/ats/reports/{resume_id}/{report_id}`
+   using an `id` from the previous step's response — expect the full
+   report, including the `job_description` it was scored against (or
+   `null` for a generic run).
+
+7. **Score an unparsed resume:** if you have a resume whose parsing
+   failed (`extracted_data: null` on upload), try scoring it — expect
+   `404`, since there's nothing for the scorer to read yet.
+
+8. **Cross-user isolation:** same pattern as Phase B Step 3/4 — a
+   second user's token should get `404` on another user's resume_id,
+   report_id, or report list.
+
+9. **Run the automated test suite:**
+   ```bash
+   pytest -v
+   ```
+   41 tests total should pass (4 health + 9 auth + 11 resume + 7
+   parsing + 10 ATS).
+
+## A note on AI suggestions (stubbed)
+
+`app/ai_engine/llm_suggestions.py` does **not** call any real LLM yet —
+this was an explicit decision for this step, so the scoring engine's
+shape (endpoints, schemas, persisted report structure) could be built
+and tested completely without requiring an API key or introducing
+per-request cost/latency before a provider is chosen.
+
+`generate_ai_suggestions()` currently returns templated suggestions
+derived from the rule-based sub-scores and missing keywords — real
+guidance, just not model-generated. The function's signature already
+accepts everything a real prompt would need (`raw_text`,
+`job_description`, `sub_scores`, `missing_keywords`), so wiring in a
+real provider later (Anthropic, OpenAI, etc.) means:
+1. Add the SDK to `requirements.txt` and an API key setting to
+   `app/core/config.py`.
+2. Rewrite this one function's body to call the provider instead.
+3. Nothing in `app/services/ats_service.py` or `app/api/v1/ats.py`
+   needs to change — same pattern as the spaCy-swap note below for
+   `rule_based_extractor.py`.
 
 ## A note on the AI/NLP stack (Python 3.14 on Windows)
 

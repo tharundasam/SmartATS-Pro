@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aura Intelligence - Student Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-container-low": "#eff4ff",
+                    "on-secondary-fixed": "#23005c",
+                    "surface-container-high": "#dce9ff",
+                    "outline-variant": "#c7c4d7",
+                    "secondary-fixed": "#e9ddff",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "tertiary-container": "#2170e4",
+                    "primary": "#4648d4",
+                    "inverse-primary": "#c0c1ff",
+                    "primary-fixed": "#e1e0ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "outline": "#767586",
+                    "on-surface-variant": "#464554",
+                    "secondary": "#6b38d4",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-tertiary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "tertiary": "#0058be",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#fffbff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#07006c",
+                    "on-tertiary-container": "#fefcff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "secondary-container": "#8455ef",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#6063ee",
+                    "surface-dim": "#cbdbf5",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#494bd6",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-on-surface": "#eaf1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "40px",
+                    "margin-desktop": "48px",
+                    "lg": "24px",
+                    "2xl": "64px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "display-xl": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-xl-mobile": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-xl": ["60px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-xl-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0px 8px 30px rgba(70, 72, 212, 0.08);
+            border-color: rgba(70, 72, 212, 0.2);
+        }
+
+        .ai-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(107, 56, 212, 0.1);
+            color: #6b38d4;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #4648d4, #6b38d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chart-container canvas {
+            filter: drop-shadow(0px 4px 12px rgba(70, 72, 212, 0.1));
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface selection:bg-primary/20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-xl border-b border-outline-variant/50 shadow-sm flex items-center justify-between px-margin-mobile h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<h1 class="font-display-xl-mobile text-display-xl-mobile bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold tracking-tight">Aura</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-6 mr-6">
+<a class="text-primary font-bold font-body-md" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md" href="#">Jobs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md" href="#">Learning</a>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 cursor-pointer" id="dashboard-avatar" onclick="handleSignOut()" title="Click to sign out">
+<img class="w-full h-full object-cover" data-alt="A professional studio headshot of a young male student with a warm smile, wearing a modern blue sweater. The background is a clean, blurred office space with soft daylighting, emphasizing a high-end corporate student aesthetic. The style is crisp, bright, and modern, using a natural light palette with subtle indigo tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpWNyzfXtqrc3A2n-SwlpeWHHCqxLB3XnCdQ_aV1lrwrj_kWo2-LkXV83F6bSlZIypdBFZD5sp6NPQ5N8hLsWZ0RGqTxENyCM9VMxtS3iX91XMwmgOoMowhEK65Wa_4l8jxKhjAby9lhir6u-nLJkMbksCtfNAR4KXJ-WoWwkLFJidNi176qkqYQFvCAKjSJ3GnqzAs3WTc_ZpgmvB98F3KG1UvLOw74oLDCBFqoVygCwzFJlYi3XrNZI3KcimfYYhNRX7qoYfprdE"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-28 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto min-h-screen">
+<!-- Welcome Summary -->
+<section class="mb-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-xs" id="welcome-heading">Welcome back</h2>
+<p class="text-on-surface-variant font-body-md" id="welcome-subline">Upload a resume to see where you stand.</p>
+</section>
+<!-- Empty state: no resume uploaded yet -->
+<section class="hidden glass-card rounded-2xl p-xl text-center mb-xl" id="no-resume-banner">
+<span class="material-symbols-outlined text-primary text-4xl">upload_file</span>
+<h3 class="font-headline-sm text-headline-sm mt-md">No resume yet</h3>
+<p class="text-on-surface-variant font-body-md mt-xs max-w-md mx-auto">Upload your resume below to get your Aura Score, skill gaps, and ATS readability report.</p>
+</section>
+<!-- Error banner -->
+<section class="hidden glass-card rounded-2xl p-lg mb-xl border-2 border-error/20 bg-error-container/10" id="dashboard-error-banner">
+<p class="text-error font-body-md" id="dashboard-error-text"></p>
+</section>
+<!-- KPI Cards Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl" id="kpi-grid">
+<div class="glass-card p-md rounded-xl flex flex-col justify-between">
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider block mb-sm">ATS Score</span>
+<div class="flex items-baseline gap-1">
+<span class="text-headline-lg font-headline-lg text-primary" id="kpi-ats-score">—</span>
+<span class="text-body-sm text-on-surface-variant">/100</span>
+</div>
+</div>
+<div class="mt-md h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary transition-all duration-700" id="kpi-ats-score-bar" style="width: 0%"></div>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between">
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider block mb-sm">Resume Strength</span>
+<div class="text-headline-sm font-headline-sm text-secondary" id="kpi-strength">—</div>
+</div>
+<div class="mt-md flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="ai-badge px-2 py-0.5 rounded-full text-[10px]">AI VERIFIED</span>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between">
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider block mb-sm">Resume Versions</span>
+<div class="text-headline-lg font-headline-lg text-tertiary" id="kpi-resume-count">—</div>
+</div>
+<div class="mt-md text-body-sm text-on-surface-variant" id="kpi-resume-current-name">&nbsp;</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between">
+<div>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider block mb-sm">Missing Keywords</span>
+<div class="text-headline-lg font-headline-lg text-error" id="kpi-missing-count">—</div>
+</div>
+<div class="mt-md text-body-sm text-error font-medium" id="kpi-missing-label">&nbsp;</div>
+</div>
+</section>
+<!-- Visualizers & Analytics Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-lg mb-xl">
+<!-- ATS Trend Chart -->
+<div class="glass-card p-lg rounded-2xl md:col-span-2">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="font-headline-sm text-headline-sm">ATS Evolution</h3>
+<span class="text-body-sm text-on-surface-variant" id="chart-range-label">Most recent reports</span>
+</div>
+<div class="h-[240px] w-full flex items-end justify-between gap-2 px-2" id="ats-evolution-chart">
+<p class="text-on-surface-variant text-body-sm m-auto" id="ats-evolution-empty">Run an analysis to start tracking your score over time.</p>
+</div>
+<div class="flex justify-between mt-md text-label-md text-on-surface-variant px-2" id="ats-evolution-dates"></div>
+</div>
+<!-- Extracted Skills -->
+<div class="glass-card p-lg rounded-2xl flex flex-col">
+<h3 class="font-headline-sm text-headline-sm mb-lg">Skills on File</h3>
+<div class="flex-grow flex items-center justify-center relative" id="skills-empty-state">
+<p class="text-on-surface-variant text-body-sm text-center">Upload a resume to extract your skills automatically.</p>
+</div>
+<div class="mt-2 flex flex-wrap gap-2 justify-center hidden" id="skills-list"></div>
+</div>
+</section>
+<!-- Recent Activity -->
+<section class="glass-card rounded-2xl overflow-hidden">
+<div class="p-lg border-b border-outline-variant/30 flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm">Recent Uploads</h3>
+</div>
+<div class="hidden" id="recent-uploads-empty">
+<p class="text-on-surface-variant text-body-sm p-lg text-center">No resumes uploaded yet.</p>
+</div>
+<div id="recent-uploads-list"></div>
+</section>
+<!-- Recommended Actions (Bento-like hint) -->
+<section class="mt-xl grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="glass-card p-lg rounded-2xl bg-primary text-white overflow-hidden relative group cursor-pointer">
+<div class="relative z-10">
+<h4 class="font-headline-sm mb-base">AI Resume Optimizer</h4>
+<p class="text-primary-fixed text-sm opacity-90 mb-md max-w-[240px]" id="optimizer-subtext">Run an ATS analysis to see tailored AI suggestions.</p>
+<button class="bg-white text-primary px-lg py-sm rounded-full text-body-sm font-bold shadow-lg active:scale-95 transition-transform disabled:opacity-60" id="run-analysis-btn" onclick="runAnalysis()">Run Analysis</button>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl opacity-10 group-hover:scale-110 transition-transform duration-500" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<label class="glass-card p-lg rounded-2xl border-2 border-dashed border-primary/30 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-colors" for="resume-upload-input">
+<div class="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="add" id="upload-card-icon">add</span>
+</div>
+<p class="font-body-md font-semibold text-on-surface" id="upload-card-label">Upload New Resume</p>
+<p class="text-body-sm text-on-surface-variant">PDF, DOCX up to 10MB</p>
+<input accept=".pdf,.docx" class="hidden" id="resume-upload-input" type="file" onchange="handleResumeUpload(event)"/>
+</label>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface/80 dark:bg-surface-container/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-xl h-20 pb-safe px-sm flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-primary scale-110 active:scale-90 duration-150" href="dashboard.html">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary active:scale-90 duration-150" href="ats-breakdown.html">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-md text-label-md">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary active:scale-90 duration-150" href="job-match.html">
+<span class="material-symbols-outlined" data-icon="travel_explore">travel_explore</span>
+<span class="font-label-md text-label-md">Match</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/30 cursor-not-allowed duration-150" href="#" onclick="return false;" title="Coming soon">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-label-md text-label-md">AI Coach</span>
+</a>
+</nav>
+<!-- Dashboard wiring -->
+<script>
+        const Api = window.SmartATSApi;
+        let currentResume = null; // most recent ResumeOut
+        let latestReport = null;  // most recent ATSReportOut (generic, no JD) for currentResume
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Api.isLoggedIn()) {
+                window.location.href = 'landing.html';
+                return;
+            }
+
+            // Smooth reveal animation for cards
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+
+            await loadDashboard();
+        });
+
+        function handleSignOut() {
+            Api.logout();
+            window.location.href = 'landing.html';
+        }
+
+        function showDashboardError(message) {
+            const banner = document.getElementById('dashboard-error-banner');
+            document.getElementById('dashboard-error-text').textContent = message;
+            banner.classList.remove('hidden');
+        }
+
+        async function loadDashboard() {
+            try {
+                const me = await Api.getMe();
+                document.getElementById('welcome-heading').textContent = `Welcome back, ${me.full_name.split(' ')[0]}`;
+            } catch (err) {
+                if (err.status === 401) { window.location.href = 'landing.html'; return; }
+            }
+
+            let resumes;
+            try {
+                resumes = await Api.listResumes();
+            } catch (err) {
+                showDashboardError(err.message);
+                return;
+            }
+
+            const list = resumes.resumes || [];
+            document.getElementById('kpi-resume-count').textContent = resumes.total ?? list.length;
+
+            if (!list.length) {
+                document.getElementById('no-resume-banner').classList.remove('hidden');
+                document.getElementById('welcome-subline').textContent = 'Upload a resume to see where you stand.';
+                renderRecentUploads([]);
+                return;
+            }
+
+            currentResume = list.find(r => r.is_current) || list[0];
+            document.getElementById('kpi-resume-current-name').textContent = currentResume.original_filename;
+            renderRecentUploads(list);
+
+            try {
+                latestReport = await Api.getLatestReport(currentResume.id);
+            } catch (err) {
+                // No reports yet is not a hard error — just means "Run Analysis" hasn't been used.
+                latestReport = null;
+            }
+
+            renderKpis(latestReport);
+            await renderSkills(currentResume.id);
+            await renderAtsEvolution(currentResume.id);
+        }
+
+        function renderKpis(report) {
+            const scoreEl = document.getElementById('kpi-ats-score');
+            const barEl = document.getElementById('kpi-ats-score-bar');
+            const strengthEl = document.getElementById('kpi-strength');
+            const missingCountEl = document.getElementById('kpi-missing-count');
+            const missingLabelEl = document.getElementById('kpi-missing-label');
+            const optimizerSubtext = document.getElementById('optimizer-subtext');
+
+            if (!report) {
+                scoreEl.textContent = '—';
+                barEl.style.width = '0%';
+                strengthEl.textContent = 'Unscored';
+                missingCountEl.textContent = '—';
+                missingLabelEl.textContent = 'Run an analysis first';
+                document.getElementById('welcome-subline').textContent = 'Run your first analysis to get your Aura Score.';
+                return;
+            }
+
+            const score = Math.round(report.overall_score);
+            scoreEl.textContent = score;
+            barEl.style.width = `${Math.min(100, score)}%`;
+            strengthEl.textContent = score >= 80 ? 'High' : score >= 60 ? 'Moderate' : 'Needs Work';
+            missingCountEl.textContent = report.missing_keywords.length;
+            missingLabelEl.textContent = report.missing_keywords.length > 0 ? 'Critical Gaps' : 'None found';
+            document.getElementById('welcome-subline').innerHTML =
+                `Your latest Aura Score is <span class="text-primary font-semibold">${score}/100</span> — ranked <span class="text-primary font-semibold">${Api.approxRankLabel(score)}</span> (approximate).`;
+            optimizerSubtext.textContent = score >= 95
+                ? 'Your score is excellent. Re-run anytime your resume changes.'
+                : `Run analysis again after edits to track improvement from ${score}/100.`;
+        }
+
+        async function renderSkills(resumeId) {
+            const emptyState = document.getElementById('skills-empty-state');
+            const listEl = document.getElementById('skills-list');
+            try {
+                const parsed = await Api.getParsedData(resumeId);
+                if (parsed.skills && parsed.skills.length) {
+                    listEl.innerHTML = parsed.skills
+                        .map(s => `<span class="ai-badge px-3 py-1 rounded-full text-[10px]">${escapeHtml(s)}</span>`)
+                        .join('');
+                    listEl.classList.remove('hidden');
+                    emptyState.classList.add('hidden');
+                } else {
+                    emptyState.textContent = 'No skills detected in this resume yet.';
+                }
+            } catch (err) {
+                emptyState.textContent = 'Skills not available — this resume may need to be re-parsed.';
+            }
+        }
+
+        async function renderAtsEvolution(resumeId) {
+            const chartEl = document.getElementById('ats-evolution-chart');
+            const datesEl = document.getElementById('ats-evolution-dates');
+            try {
+                const reports = await Api.listReports(resumeId);
+                const list = (Array.isArray(reports) ? reports : reports.reports || [])
+                    .slice()
+                    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+                    .slice(-6); // last 6 reports, oldest to newest, to mirror the original mockup's bar count
+
+                if (!list.length) return; // keep the empty-state message already in the DOM
+
+                chartEl.innerHTML = list.map(r => {
+                    const score = Math.round(r.overall_score);
+                    const heightPct = Math.max(8, score); // floor so a 0 score still renders a sliver
+                    return `
+                        <div class="flex-1 bg-primary/40 rounded-t-lg transition-all hover:bg-primary/70 relative group" style="height:${heightPct}%">
+                            <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">${score}</div>
+                        </div>`;
+                }).join('');
+
+                datesEl.innerHTML = list.map(r => `<span>${formatShortDate(r.created_at)}</span>`).join('');
+            } catch (err) {
+                // Leave the existing empty-state copy in place.
+            }
+        }
+
+        function renderRecentUploads(list) {
+            const emptyEl = document.getElementById('recent-uploads-empty');
+            const listEl = document.getElementById('recent-uploads-list');
+
+            if (!list.length) {
+                emptyEl.classList.remove('hidden');
+                listEl.innerHTML = '';
+                return;
+            }
+            emptyEl.classList.add('hidden');
+
+            listEl.innerHTML = `<div class="divide-y divide-outline-variant/20">${list.map(r => `
+                <div class="p-md hover:bg-surface-container-low transition-colors flex items-center justify-between group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined" data-icon="description">description</span>
+                        </div>
+                        <div>
+                            <p class="font-body-md font-semibold text-on-surface">${escapeHtml(r.original_filename)}</p>
+                            <p class="text-body-sm text-on-surface-variant">Uploaded ${formatRelativeDate(r.uploaded_at)} • ${formatBytes(r.file_size_bytes)} • v${r.version}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        ${r.is_current ? '<span class="hidden md:inline-block px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-bold">CURRENT</span>' : ''}
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors cursor-pointer" data-icon="chevron_right" onclick="window.location.href='ats-breakdown.html?resume_id=${r.id}'">chevron_right</span>
+                    </div>
+                </div>`).join('')}</div>`;
+        }
+
+        async function handleResumeUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const icon = document.getElementById('upload-card-icon');
+            const label = document.getElementById('upload-card-label');
+            icon.textContent = 'sync';
+            icon.classList.add('animate-spin');
+            label.textContent = 'Uploading…';
+
+            try {
+                await Api.uploadResume(file);
+                label.textContent = 'Uploaded! Refreshing…';
+                document.getElementById('no-resume-banner').classList.add('hidden');
+                await loadDashboard();
+            } catch (err) {
+                showDashboardError(err.message);
+                label.textContent = 'Upload failed — try again';
+            } finally {
+                icon.textContent = 'add';
+                icon.classList.remove('animate-spin');
+                setTimeout(() => { label.textContent = 'Upload New Resume'; }, 2000);
+                event.target.value = '';
+            }
+        }
+
+        async function runAnalysis() {
+            if (!currentResume) {
+                showDashboardError('Upload a resume before running an analysis.');
+                return;
+            }
+            const btn = document.getElementById('run-analysis-btn');
+            const original = btn.textContent;
+            btn.textContent = 'Analyzing…';
+            btn.disabled = true;
+
+            try {
+                await Api.scoreResume(currentResume.id, null); // null JD = generic ATS check, matches this dashboard's scope
+                window.location.href = `ats-breakdown.html?resume_id=${currentResume.id}`;
+            } catch (err) {
+                showDashboardError(err.message);
+                btn.textContent = original;
+                btn.disabled = false;
+            }
+        }
+
+        // ---- formatting helpers ----
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        function formatBytes(bytes) {
+            if (bytes < 1024) return `${bytes} B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+        }
+        function formatRelativeDate(iso) {
+            const date = new Date(iso);
+            const diffMs = Date.now() - date.getTime();
+            const diffHrs = diffMs / 36e5;
+            if (diffHrs < 1) return 'just now';
+            if (diffHrs < 24) return `${Math.floor(diffHrs)} hour${Math.floor(diffHrs) === 1 ? '' : 's'} ago`;
+            const diffDays = Math.floor(diffHrs / 24);
+            if (diffDays < 30) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+            return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        function formatShortDate(iso) {
+            return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+    </script>
+</body></html>

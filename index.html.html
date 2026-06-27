@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartATS Pro - AI-Powered Resume Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-container-low": "#eff4ff",
+                    "on-secondary-fixed": "#23005c",
+                    "surface-container-high": "#dce9ff",
+                    "outline-variant": "#c7c4d7",
+                    "secondary-fixed": "#e9ddff",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "tertiary-container": "#2170e4",
+                    "primary": "#4648d4",
+                    "inverse-primary": "#c0c1ff",
+                    "primary-fixed": "#e1e0ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "outline": "#767586",
+                    "on-surface-variant": "#464554",
+                    "secondary": "#6b38d4",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-tertiary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "tertiary": "#0058be",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#fffbff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#07006c",
+                    "on-tertiary-container": "#fefcff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "secondary-container": "#8455ef",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#6063ee",
+                    "surface-dim": "#cbdbf5",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#494bd6",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-on-surface": "#eaf1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "40px",
+                    "margin-desktop": "48px",
+                    "lg": "24px",
+                    "2xl": "64px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "display-xl": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-xl-mobile": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-xl": ["60px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-xl-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            color: #0b1c30;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #4648d4 0%, #6b38d4 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #4648d4 0%, #6b38d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nav-blur {
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-xl border-b border-outline-variant/50 shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 w-full">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary text-3xl">auto_awesome</span>
+<span class="font-display-xl-mobile text-headline-sm text-gradient font-bold">Aura Intelligence</span>
+</div>
+<nav class="hidden md:flex items-center space-x-lg">
+<a class="text-primary font-bold font-body-md" href="#">Home</a>
+<a class="text-on-surface-variant hover:bg-primary/5 px-sm py-base rounded-lg transition-colors font-body-md" href="#">Analysis</a>
+<a class="text-on-surface-variant hover:bg-primary/5 px-sm py-base rounded-lg transition-colors font-body-md" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:bg-primary/5 px-sm py-base rounded-lg transition-colors font-body-md" href="#">AI Coach</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="hidden md:block px-md py-sm font-semibold text-primary hover:bg-primary/5 rounded-xl transition-all" id="auth-action-btn" onclick="handleAuthButtonClick()">Sign In</button>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container overflow-hidden" id="header-avatar" style="display:none;">
+<img class="w-full h-full object-cover" data-alt="A professional high-end headshot of a corporate user in a modern office, soft bokeh background with glass partitions, indigo and purple ambient lighting accents, sharp focus, 8k resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo4hRNnQMi_iMDjrSPXMbW68Al_HcqZVw30ajVW6lTaiFkIbzbnMgcN8vY24MCYGiJBOePsXNzqSmqBcSkO-ONTwaLpbqqQu6AngO-auuwhnlYt4JyjTMqrfy_ZAxq3cdJQbmxXhbRIylKw3qkgYQA0oCTjDfdzgCOutkDb9EftNH2nHkrNlxfw_Ffa_vhAnkyz_nOVtl36fUpamIDNJNnleV77CXl8eweUgMUftcvlH6pl2fUz66eH2wPws12sx27ktx_ZoR4xha3"/>
+</div>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="relative min-h-screen pt-32 pb-xl px-margin-mobile md:px-margin-desktop overflow-hidden">
+<!-- Animated Shader Background -->
+
+<div class="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-xl items-center">
+<div class="space-y-lg text-left">
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-primary/10 border border-primary/20 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="text-label-md font-label-md text-primary uppercase tracking-wider">New: AI Resume Enhancer 2.0</span>
+</div>
+<h1 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-on-surface leading-tight">
+                    Land More Interviews with <span class="text-gradient">AI-Powered</span> Resume Intelligence
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Stop getting ghosted by ATS bots. Our Aura AI analyzes your resume against 50,000+ job descriptions to give you a winning edge.
+                </p>
+<div class="flex flex-col sm:flex-row gap-md pt-base">
+<button class="px-2xl py-md rounded-xl primary-gradient text-on-primary font-bold text-body-lg shadow-lg hover:shadow-primary/30 transition-all active:scale-95" onclick="goToAnalyze()">
+                        Analyze Resume
+                    </button>
+<button class="px-2xl py-md rounded-xl border-2 border-outline-variant bg-white/50 backdrop-blur text-on-surface font-bold text-body-lg flex items-center justify-center gap-base hover:bg-white transition-all active:scale-95">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Demo
+                    </button>
+</div>
+<div class="flex items-center gap-md pt-md">
+<div class="flex -space-x-sm">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-200"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-300"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-400"></div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Trusted by 12,000+ professionals</p>
+</div>
+</div>
+<!-- Dashboard Mockup Card -->
+<div class="relative animate-float">
+<div class="glass-card rounded-2xl p-lg shadow-2xl relative overflow-hidden">
+<div class="flex justify-between items-center mb-xl">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Analysis Report</h3>
+<p class="text-body-sm text-on-surface-variant">Product Designer - Senior Level</p>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
+<span class="text-headline-sm font-bold text-primary">84</span>
+</div>
+</div>
+<div class="space-y-lg">
+<div class="space-y-sm">
+<div class="flex justify-between text-body-sm">
+<span>ATS Compatibility</span>
+<span class="font-bold text-primary">High</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full primary-gradient w-[84%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="p-md rounded-xl bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary mb-base">trending_up</span>
+<p class="text-label-md font-label-md text-primary uppercase">Job Match</p>
+<p class="text-headline-sm font-bold">92%</p>
+</div>
+<div class="p-md rounded-xl bg-secondary/5 border border-secondary/10">
+<span class="material-symbols-outlined text-secondary mb-base">error_outline</span>
+<p class="text-label-md font-label-md text-secondary uppercase">Skill Gaps</p>
+<p class="text-headline-sm font-bold">3 Detected</p>
+</div>
+</div>
+<div class="p-md rounded-xl bg-white border border-outline-variant/30">
+<div class="flex items-center gap-sm mb-base">
+<span class="bg-primary/10 text-primary p-1 rounded-md material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<p class="text-body-sm font-bold">AI Suggestion</p>
+</div>
+<p class="text-body-sm text-on-surface-variant italic">"Quantify your impact in the 'Design System' section by mentioning a 15% increase in dev efficiency."</p>
+</div>
+</div>
+</div>
+<!-- Abstract decorative element -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl z-[-1]"></div>
+<div class="absolute -bottom-10 -left-10 w-48 h-48 bg-primary/20 rounded-full blur-3xl z-[-1]"></div>
+</div>
+</div>
+</section>
+<!-- Statistics Section -->
+<section class="py-2xl bg-surface relative">
+<div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-xl text-center">
+<div class="space-y-base">
+<p class="font-display-xl-mobile text-display-xl-mobile text-primary font-bold" data-count="95">0%</p>
+<p class="text-body-sm font-label-md text-on-surface-variant uppercase tracking-widest">Success Rate</p>
+</div>
+<div class="space-y-base">
+<p class="font-display-xl-mobile text-display-xl-mobile text-primary font-bold" data-count="50">0k+</p>
+<p class="text-body-sm font-label-md text-on-surface-variant uppercase tracking-widest">Resumes Scanned</p>
+</div>
+<div class="space-y-base">
+<p class="font-display-xl-mobile text-display-xl-mobile text-primary font-bold" data-count="3">0x</p>
+<p class="text-body-sm font-label-md text-on-surface-variant uppercase tracking-widest">Faster Response</p>
+</div>
+<div class="space-y-base">
+<p class="font-display-xl-mobile text-display-xl-mobile text-primary font-bold" data-count="12">0k</p>
+<p class="text-body-sm font-label-md text-on-surface-variant uppercase tracking-widest">Pro Users</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Bento Grid -->
+<section class="py-2xl px-margin-mobile md:px-margin-desktop bg-surface-container-low">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-2xl space-y-md">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Intelligence Beyond Simple Keywords</h2>
+<p class="text-body-lg text-on-surface-variant max-w-2xl mx-auto">Our deep-learning engine understands context, seniority, and industry nuance better than any standard scanner.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Large Card -->
+<div class="md:col-span-2 glass-card rounded-2xl p-lg flex flex-col justify-between overflow-hidden relative group">
+<div class="relative z-10">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-sm">Deep ATS Analysis</h3>
+<p class="text-body-md text-on-surface-variant max-w-md">Understand how Applicant Tracking Systems perceive your experience. We simulate top-tier ATS algorithms to ensure you rank #1.</p>
+</div>
+<div class="mt-xl relative h-32 md:h-48 overflow-hidden rounded-xl border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A futuristic UI interface showing code-like resume parsing, flowing digital data streams in shades of indigo and violet, high-tech aesthetic, clean minimalist dashboard style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbtLMu7sVMp9u_26NX2ldHoj9TSQJvKGt_Cots7KV_h1xOfTP6pSwnGcoYBCHhagEG7e0TZIysS598l4cAEw_VDJXLTu84ih-IxGwgO9h2joxW_s6SdDo24qnUNqKR8OXyWly96LGfx-lLY1W3vhzS-BGLsmWQARpWz6xee49DYRcxFO9EQdI449fqU7ErrWVstOwsPlLoCZbToGVvYG0YKwfOriVrvchSOENsUenWYSWcUPsq1JxNRAjge6JmHi2JB12f1bv6zOrM"/>
+</div>
+</div>
+<!-- Vertical Card -->
+<div class="glass-card rounded-2xl p-lg space-y-md flex flex-col group">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">target</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm">Semantic Job Match</h3>
+<p class="text-body-md text-on-surface-variant">Don't just match words; match intent. We analyze your accomplishments against job requirements for a semantic fit score.</p>
+<div class="flex-grow flex items-end">
+<div class="w-full p-md bg-surface-variant/50 rounded-xl border border-outline-variant/20">
+<div class="flex justify-between items-center mb-base">
+<span class="text-label-md font-label-md">Match Quality</span>
+<span class="text-label-md font-bold text-secondary">EXCELLENT</span>
+</div>
+<div class="h-2 w-full bg-white rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row -->
+<div class="glass-card rounded-2xl p-lg space-y-md group">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">trending_up</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm">Skill Gap Analysis</h3>
+<p class="text-body-sm text-on-surface-variant">Identify specific certifications or software tools missing from your profile that are holding you back from high-paying roles.</p>
+</div>
+<div class="glass-card rounded-2xl p-lg space-y-md group">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm">AI Bullet Rewriter</h3>
+<p class="text-body-sm text-on-surface-variant">Transform "Handled customer calls" into "Optimized client communication pipelines, reducing resolution time by 22%."</p>
+</div>
+<div class="glass-card rounded-2xl p-lg space-y-md group">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">forum</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm">Interview Coach</h3>
+<p class="text-body-sm text-on-surface-variant">Generate customized interview questions based on your specific resume and the job description you're applying for.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works -->
+<section class="py-2xl px-margin-mobile md:px-margin-desktop bg-surface">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline-lg text-headline-lg text-center mb-2xl">The Path to Your Next Career Move</h2>
+<div class="relative">
+<!-- Connecting Line (Desktop) -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-px border-t border-dashed border-outline-variant/50 -translate-y-1/2 z-0"></div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-xl relative z-10">
+<div class="bg-white p-lg rounded-2xl shadow-sm border border-outline-variant/30 text-center space-y-md">
+<div class="w-16 h-16 rounded-full primary-gradient text-on-primary flex items-center justify-center mx-auto text-headline-sm font-bold shadow-lg">1</div>
+<h4 class="font-headline-sm text-headline-sm">Upload Resume</h4>
+<p class="text-body-md text-on-surface-variant">Drag and drop your PDF or DOCX file. Our engine parses it in seconds with 99.9% accuracy.</p>
+</div>
+<div class="bg-white p-lg rounded-2xl shadow-sm border border-outline-variant/30 text-center space-y-md">
+<div class="w-16 h-16 rounded-full primary-gradient text-on-primary flex items-center justify-center mx-auto text-headline-sm font-bold shadow-lg">2</div>
+<h4 class="font-headline-sm text-headline-sm">Get Aura Score</h4>
+<p class="text-body-md text-on-surface-variant">View your score, identified skill gaps, and ATS readability report instantly on your dashboard.</p>
+</div>
+<div class="bg-white p-lg rounded-2xl shadow-sm border border-outline-variant/30 text-center space-y-md">
+<div class="w-16 h-16 rounded-full primary-gradient text-on-primary flex items-center justify-center mx-auto text-headline-sm font-bold shadow-lg">3</div>
+<h4 class="font-headline-sm text-headline-sm">Optimize &amp; Apply</h4>
+<p class="text-body-md text-on-surface-variant">Apply suggested changes using our AI rewriter and hit 'Apply' with absolute confidence.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-2xl px-margin-mobile md:px-margin-desktop mb-2xl">
+<div class="max-w-5xl mx-auto primary-gradient rounded-[2rem] p-xl text-center text-on-primary relative overflow-hidden">
+<div class="relative z-10 space-y-lg">
+<h2 class="font-display-xl-mobile md:font-headline-lg text-display-xl-mobile md:text-headline-lg font-bold">Ready to outsmart the bots?</h2>
+<p class="text-body-lg opacity-90 max-w-xl mx-auto">Join thousands of job seekers who landed interviews at Google, Meta, and Stripe using Aura Intelligence.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-md pt-md">
+<button class="px-2xl py-md rounded-xl bg-white text-primary font-bold text-body-lg shadow-xl hover:scale-105 transition-transform" onclick="goToAnalyze()">Get Started for Free</button>
+<button class="px-2xl py-md rounded-xl border border-white/30 bg-white/10 backdrop-blur font-bold text-body-lg hover:bg-white/20 transition-all">View Pricing Plans</button>
+</div>
+</div>
+<!-- Decorative circle -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- Footer Space for padding -->
+<div class="h-32"></div>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 dark:bg-surface-container/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex justify-around items-center h-20 pb-safe px-sm">
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim scale-110">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-md text-label-md">Analysis</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">travel_explore</span>
+<span class="font-label-md text-label-md">Match</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md text-label-md">AI Coach</span>
+</button>
+</nav>
+<!-- Auth Modal -->
+<div class="fixed inset-0 z-[100] hidden items-center justify-center bg-on-surface/40 backdrop-blur-sm px-margin-mobile" id="auth-modal">
+<div class="glass-card bg-white w-full max-w-md rounded-2xl p-xl relative shadow-2xl">
+<button class="absolute top-md right-md text-on-surface-variant hover:text-on-surface" onclick="closeAuthModal()">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
+<h2 class="font-headline-sm text-headline-sm" id="auth-modal-title">Sign in to Aura</h2>
+</div>
+<div class="space-y-md" id="auth-form-fields">
+<div class="hidden" id="full-name-field">
+<label class="text-body-sm font-semibold text-on-surface-variant block mb-xs">Full name</label>
+<input class="w-full px-md py-sm border border-outline-variant/50 rounded-xl outline-none focus:ring-2 focus:ring-primary/30" id="auth-full-name" placeholder="Alex Rivers" type="text"/>
+</div>
+<div>
+<label class="text-body-sm font-semibold text-on-surface-variant block mb-xs">Email</label>
+<input autocomplete="email" class="w-full px-md py-sm border border-outline-variant/50 rounded-xl outline-none focus:ring-2 focus:ring-primary/30" id="auth-email" placeholder="you@example.com" type="email"/>
+</div>
+<div>
+<label class="text-body-sm font-semibold text-on-surface-variant block mb-xs">Password</label>
+<input autocomplete="current-password" class="w-full px-md py-sm border border-outline-variant/50 rounded-xl outline-none focus:ring-2 focus:ring-primary/30" id="auth-password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<p class="text-body-sm text-error mt-sm hidden" id="auth-error"></p>
+<button class="w-full mt-lg primary-gradient text-on-primary font-bold py-md rounded-xl active:scale-95 transition-all" id="auth-submit-btn" onclick="submitAuthForm()">Sign In</button>
+<p class="text-body-sm text-on-surface-variant text-center mt-md">
+<span id="auth-toggle-prompt">Don't have an account?</span>
+<button class="text-primary font-semibold hover:underline" id="auth-toggle-btn" onclick="toggleAuthMode()">Create one</button>
+</p>
+</div>
+</div>
+<script>
+        // Animated counters
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = entry.target;
+                    const countTo = parseInt(target.getAttribute('data-count'));
+                    const duration = 2000;
+                    const startTime = performance.now();
+                    
+                    const updateCount = (currentTime) => {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const currentCount = Math.floor(progress * countTo);
+                        
+                        if (target.innerText.includes('%')) target.innerText = currentCount + '%';
+                        else if (target.innerText.includes('k+')) target.innerText = currentCount + 'k+';
+                        else if (target.innerText.includes('x')) target.innerText = currentCount + 'x';
+                        else if (target.innerText.includes('k')) target.innerText = currentCount + 'k';
+                        else target.innerText = currentCount;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(updateCount);
+                        } else {
+                            // Ensure final state matches precisely
+                            if (target.innerText.includes('%')) target.innerText = countTo + '%';
+                            else if (target.innerText.includes('k+')) target.innerText = countTo + 'k+';
+                            else if (target.innerText.includes('x')) target.innerText = countTo + 'x';
+                            else if (target.innerText.includes('k')) target.innerText = countTo + 'k';
+                        }
+                    };
+                    
+                    requestAnimationFrame(updateCount);
+                    observer.unobserve(target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('[data-count]').forEach(counter => {
+            observer.observe(counter);
+        });
+
+        // Micro-interactions for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.classList.add('scale-95');
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.classList.remove('scale-95');
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.classList.remove('scale-95');
+            });
+        });
+    </script>
+    <script>
+        // ---------------------------------------------------------------
+        // Auth wiring — register / login via SmartATSApi, header state sync
+        // ---------------------------------------------------------------
+        let authMode = 'login'; // 'login' | 'register'
+
+        function syncHeaderAuthState() {
+            const btn = document.getElementById('auth-action-btn');
+            const avatar = document.getElementById('header-avatar');
+            if (window.SmartATSApi.isLoggedIn()) {
+                const user = window.SmartATSApi.getCachedUser();
+                btn.textContent = 'Sign Out';
+                btn.onclick = () => { window.SmartATSApi.logout(); syncHeaderAuthState(); };
+                avatar.style.display = 'flex';
+                avatar.title = user ? `${user.full_name} (${user.email})` : '';
+            } else {
+                btn.textContent = 'Sign In';
+                btn.onclick = handleAuthButtonClick;
+                avatar.style.display = 'none';
+            }
+        }
+
+        function handleAuthButtonClick() {
+            openAuthModal('login');
+        }
+
+        function goToAnalyze() {
+            // Logged-in users go straight to the dashboard; everyone else
+            // signs in (or registers) first, then we redirect them on.
+            if (window.SmartATSApi.isLoggedIn()) {
+                window.location.href = 'dashboard.html';
+            } else {
+                openAuthModal('login', 'dashboard.html');
+            }
+        }
+
+        let postAuthRedirect = null;
+
+        function openAuthModal(mode, redirectTo = null) {
+            authMode = mode;
+            postAuthRedirect = redirectTo;
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.add('flex');
+            document.getElementById('auth-error').classList.add('hidden');
+            updateAuthModalCopy();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('flex');
+        }
+
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            updateAuthModalCopy();
+        }
+
+        function updateAuthModalCopy() {
+            const isRegister = authMode === 'register';
+            document.getElementById('auth-modal-title').textContent = isRegister ? 'Create your Aura account' : 'Sign in to Aura';
+            document.getElementById('full-name-field').classList.toggle('hidden', !isRegister);
+            document.getElementById('auth-submit-btn').textContent = isRegister ? 'Create account' : 'Sign In';
+            document.getElementById('auth-toggle-prompt').textContent = isRegister ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('auth-toggle-btn').textContent = isRegister ? 'Sign in' : 'Create one';
+        }
+
+        async function submitAuthForm() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const fullName = document.getElementById('auth-full-name').value.trim();
+            const errorEl = document.getElementById('auth-error');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            errorEl.classList.add('hidden');
+
+            if (!email || !password || (authMode === 'register' && !fullName)) {
+                errorEl.textContent = 'Please fill in every field.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const originalLabel = submitBtn.textContent;
+            submitBtn.textContent = authMode === 'register' ? 'Creating account…' : 'Signing in…';
+            submitBtn.disabled = true;
+
+            try {
+                if (authMode === 'register') {
+                    await window.SmartATSApi.register({ fullName, email, password });
+                } else {
+                    await window.SmartATSApi.login({ email, password });
+                }
+                closeAuthModal();
+                syncHeaderAuthState();
+                window.location.href = postAuthRedirect || 'dashboard.html';
+            } catch (err) {
+                errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+                errorEl.classList.remove('hidden');
+            } finally {
+                submitBtn.textContent = originalLabel;
+                submitBtn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', syncHeaderAuthState);
+    </script>
+</body></html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATS Score Breakdown | Aura Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Shared Component Logic & Visual Tokens -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-container-low": "#eff4ff",
+                    "on-secondary-fixed": "#23005c",
+                    "surface-container-high": "#dce9ff",
+                    "outline-variant": "#c7c4d7",
+                    "secondary-fixed": "#e9ddff",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "tertiary-container": "#2170e4",
+                    "primary": "#4648d4",
+                    "inverse-primary": "#c0c1ff",
+                    "primary-fixed": "#e1e0ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "outline": "#767586",
+                    "on-surface-variant": "#464554",
+                    "secondary": "#6b38d4",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-tertiary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "tertiary": "#0058be",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#fffbff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#07006c",
+                    "on-tertiary-container": "#fefcff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "secondary-container": "#8455ef",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#6063ee",
+                    "surface-dim": "#cbdbf5",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#494bd6",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-on-surface": "#eaf1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "40px",
+                    "margin-desktop": "48px",
+                    "lg": "24px",
+                    "2xl": "64px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "display-xl": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-xl-mobile": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-xl": ["60px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-xl-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .score-gradient {
+            background: conic-gradient(from 180deg at 50% 50%, #4648d4 0%, #6b38d4 82%, transparent 82%);
+        }
+        .animate-score {
+            animation: score-reveal 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes score-reveal {
+            from { opacity: 0; transform: scale(0.9) rotate(-10deg); }
+            to { opacity: 1; transform: scale(1) rotate(0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-xl border-b border-outline-variant/50 shadow-sm flex items-center justify-between px-margin-mobile h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/5 active:scale-95 transition-all" onclick="window.location.href='dashboard.html'">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile text-primary">ATS Score Breakdown</h1>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A professional business portrait of a modern tech executive with soft lighting, set against a blurred office background. The image has a clean, high-end SaaS aesthetic with a cool blue and purple color grading, reflecting the Aura Intelligence brand identity of precision and sophistication." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAK6iOlAuFCWPLXbUa1v67yeG1RdG64Wz5E0ZV-pJkfVkLUVcB8Y037pL2D7qkrl9QeTLuQmHLw0RWvzuhuAdSdCPWRLWJzAt2_akiA34SZx73noyCdNDYmHjFR54W6TjXoXu6rXXFHRfhm9rxt159MuKypJwX3TaJorxlt3LrP_WUqWCQYoNPUuhERBPrMS1BcVEyVIWI04j-I510muF0q232hsgdmMzih0OW9mmeYx_87ZoxgMcEc2vu_OanxlI26FPCBqCo5gNVg"/>
+</div>
+</div>
+</header>
+<main class="pt-24 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto">
+<!-- Loading state -->
+<div class="text-center py-2xl" id="breakdown-loading">
+<span class="material-symbols-outlined text-primary text-4xl animate-spin">progress_activity</span>
+<p class="text-on-surface-variant mt-md">Loading your ATS report…</p>
+</div>
+<!-- No report state -->
+<div class="hidden text-center py-2xl glass-card rounded-2xl" id="breakdown-empty">
+<span class="material-symbols-outlined text-primary text-4xl">analytics</span>
+<h3 class="font-headline-sm text-headline-sm mt-md">No analysis yet</h3>
+<p class="text-on-surface-variant mt-xs mb-lg">Run an ATS analysis on your resume to see the full breakdown.</p>
+<button class="primary-gradient text-white px-xl py-md rounded-xl font-bold active:scale-95 transition-all" id="run-first-analysis-btn" onclick="runFirstAnalysis()">Run Analysis</button>
+</div>
+<!-- Error state -->
+<div class="hidden text-center py-2xl glass-card rounded-2xl border-2 border-error/20" id="breakdown-error">
+<p class="text-error font-body-md" id="breakdown-error-text"></p>
+</div>
+<!-- Main content (hidden until data loads) -->
+<div class="hidden" id="breakdown-content">
+<!-- Hero Score Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-xl items-center">
+<div class="lg:col-span-5 flex flex-col items-center justify-center p-lg glass-card rounded-2xl animate-score">
+<div class="relative w-64 h-64 flex items-center justify-center">
+<!-- Background Circle -->
+<div class="absolute inset-0 rounded-full border-[12px] border-surface-container"></div>
+<!-- Active Progress Circle -->
+<div class="absolute inset-0 rounded-full border-[12px] border-transparent score-gradient opacity-20"></div>
+<!-- SVG Progress for sharper look -->
+<svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 100 100">
+<circle class="text-primary" cx="50" cy="50" fill="transparent" id="score-ring" r="44" stroke="currentColor" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-width="8" style="transition: stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1);"></circle>
+</svg>
+<div class="text-center z-10">
+<div class="font-display-xl text-display-xl bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent" id="hero-score">—</div>
+<div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Score / 100</div>
+</div>
+</div>
+<div class="mt-lg text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary/10 text-tertiary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                        AI ANALYZED
+                    </span>
+<p class="mt-md text-on-surface-variant font-body-sm max-w-xs mx-auto" id="hero-rank-line">&nbsp;</p>
+</div>
+</div>
+<!-- Insights / Quick Stats -->
+<div class="lg:col-span-7 space-y-md">
+<div class="glass-card p-lg rounded-2xl border-l-4 border-l-secondary">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Critical Insight</h3>
+<p class="text-on-surface-variant font-body-md" id="critical-insight-text">&nbsp;</p>
+<button class="mt-lg bg-gradient-to-r from-primary to-secondary text-on-primary px-lg py-md rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all flex items-center gap-2" onclick="window.location.href='job-match.html'">
+<span class="material-symbols-outlined">edit_note</span>
+<span id="insight-cta-label">Improve Keywords</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="glass-card p-md rounded-xl">
+<div class="text-on-surface-variant font-label-md uppercase mb-xs">Job Fit <span class="opacity-60">(approx.)</span></div>
+<div class="font-headline-sm text-primary" id="job-fit-label">—</div>
+</div>
+<div class="glass-card p-md rounded-xl">
+<div class="text-on-surface-variant font-label-md uppercase mb-xs">ATS Rank <span class="opacity-60">(approx.)</span></div>
+<div class="font-headline-sm text-secondary" id="ats-rank-label">—</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Breakdown Bento Grid -->
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-lg">Metric Breakdown</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Skills Score -->
+<div class="glass-card p-lg rounded-2xl flex flex-col justify-between hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">psychology</span>
+</div>
+<span class="font-label-md text-label-md text-primary bg-primary-fixed px-2 py-0.5 rounded-full" id="metric-skills-pct">—%</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[20px] mb-base">Skills Score</h4>
+<p class="text-on-surface-variant text-body-sm mb-lg">Core competency alignment with job description.</p>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-1000" id="metric-skills-bar" style="width: 0%"></div>
+</div>
+</div>
+</div>
+<!-- Formatting -->
+<div class="glass-card p-lg rounded-2xl flex flex-col justify-between hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">grid_view</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary bg-tertiary-fixed px-2 py-0.5 rounded-full" id="metric-formatting-pct">—%</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[20px] mb-base">Formatting</h4>
+<p class="text-on-surface-variant text-body-sm mb-lg">Machine readability and layout parsing stability.</p>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full transition-all duration-1000" id="metric-formatting-bar" style="width: 0%"></div>
+</div>
+</div>
+</div>
+<!-- Keywords -->
+<div class="glass-card p-lg rounded-2xl flex flex-col justify-between border-2 border-error/10 bg-error-container/5 hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-error">search_check</span>
+</div>
+<span class="font-label-md text-label-md text-error bg-error-container px-2 py-0.5 rounded-full" id="metric-keywords-pct">—%</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[20px] mb-base">Keywords</h4>
+<p class="text-on-surface-variant text-body-sm mb-lg" id="metric-keywords-desc">Missing keyword data unavailable.</p>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full transition-all duration-1000" id="metric-keywords-bar" style="width: 0%"></div>
+</div>
+</div>
+</div>
+<!-- Education -->
+<div class="glass-card p-lg rounded-2xl flex flex-col justify-between hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">school</span>
+</div>
+<span class="font-label-md text-label-md text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full" id="metric-education-pct">—%</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[20px] mb-base">Education</h4>
+<p class="text-on-surface-variant text-body-sm mb-lg">Academic credentials match against parsed resume data.</p>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-1000" id="metric-education-bar" style="width: 0%"></div>
+</div>
+</div>
+</div>
+<!-- Projects -->
+<div class="glass-card p-lg rounded-2xl flex flex-col justify-between hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start mb-lg">
+<div class="w-12 h-12 bg-tertiary-container/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary-container">deployed_code</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary-container bg-surface-container-highest px-2 py-0.5 rounded-full" id="metric-projects-pct">—%</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[20px] mb-base">Projects</h4>
+<p class="text-on-surface-variant text-body-sm mb-lg">Relevance of listed case studies and portfolio.</p>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full transition-all duration-1000" id="metric-projects-bar" style="width: 0%"></div>
+</div>
+</div>
+</div>
+<!-- Missing Keywords -->
+<div class="glass-card p-lg rounded-2xl flex flex-col" id="missing-keywords-card">
+<div class="flex items-center gap-sm mb-lg">
+<div class="w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<h4 class="font-headline-sm text-[20px]">Missing Keywords</h4>
+</div>
+<div class="flex flex-wrap gap-sm" id="missing-keywords-list">
+<span class="text-on-surface-variant text-body-sm">None — nice work.</span>
+</div>
+</div>
+</div>
+<!-- Re-run analysis -->
+<div class="mt-xl text-center">
+<button class="border-2 border-primary/30 text-primary px-xl py-md rounded-xl font-bold hover:bg-primary/5 active:scale-95 transition-all" id="rerun-analysis-btn" onclick="rerunAnalysis()">Re-run Analysis</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 dark:bg-surface-container/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex justify-around items-center h-20 pb-safe px-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-150" href="dashboard.html">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim scale-110 active:scale-90 duration-150" href="ats-breakdown.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="font-label-md text-label-md font-bold">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-150" href="job-match.html">
+<span class="material-symbols-outlined">travel_explore</span>
+<span class="font-label-md text-label-md">Match</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/30 cursor-not-allowed duration-150" href="#" onclick="return false;" title="Coming soon">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md text-label-md">AI Coach</span>
+</a>
+</nav>
+<!-- Breakdown wiring -->
+<script>
+        const Api = window.SmartATSApi;
+        let activeResumeId = null;
+
+        function getResumeIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('resume_id');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Api.isLoggedIn()) {
+                window.location.href = 'landing.html';
+                return;
+            }
+            await loadBreakdown();
+        });
+
+        async function resolveResumeId() {
+            const fromUrl = getResumeIdFromUrl();
+            if (fromUrl) return fromUrl;
+
+            const resumes = await Api.listResumes();
+            const list = resumes.resumes || [];
+            const current = list.find(r => r.is_current) || list[0];
+            return current ? current.id : null;
+        }
+
+        async function loadBreakdown() {
+            const loadingEl = document.getElementById('breakdown-loading');
+            const emptyEl = document.getElementById('breakdown-empty');
+            const errorEl = document.getElementById('breakdown-error');
+            const contentEl = document.getElementById('breakdown-content');
+
+            loadingEl.classList.remove('hidden');
+            emptyEl.classList.add('hidden');
+            errorEl.classList.add('hidden');
+            contentEl.classList.add('hidden');
+
+            try {
+                activeResumeId = await resolveResumeId();
+                if (!activeResumeId) {
+                    loadingEl.classList.add('hidden');
+                    emptyEl.classList.remove('hidden');
+                    document.querySelector('#breakdown-empty h3').textContent = 'No resume uploaded yet';
+                    document.querySelector('#breakdown-empty p').textContent = 'Upload a resume from the dashboard first.';
+                    document.getElementById('run-first-analysis-btn').textContent = 'Go to Dashboard';
+                    document.getElementById('run-first-analysis-btn').onclick = () => window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                // Generic (no job description) report — this page mirrors the
+                // standalone "ATS Score Breakdown" mode per ATSScoreRequest's docstring.
+                let report = await Api.getLatestReport(activeResumeId);
+                report = pickGenericReport(report, await Api.listReports(activeResumeId));
+
+                loadingEl.classList.add('hidden');
+
+                if (!report) {
+                    emptyEl.classList.remove('hidden');
+                    return;
+                }
+
+                renderReport(report);
+                contentEl.classList.remove('hidden');
+            } catch (err) {
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                document.getElementById('breakdown-error-text').textContent = err.message;
+            }
+        }
+
+        /** Prefer the most recent report that has no job_description (generic ATS check). */
+        function pickGenericReport(latest, allReportsResp) {
+            if (latest && latest.job_description == null) return latest;
+            const all = Array.isArray(allReportsResp) ? allReportsResp : (allReportsResp.reports || []);
+            const generic = all
+                .filter(r => r.job_description == null)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            return generic[0] || latest || null;
+        }
+
+        function renderReport(report) {
+            const score = Math.round(report.overall_score);
+            const circumference = 276.46; // matches the SVG circle's stroke-dasharray in the markup
+
+            document.getElementById('hero-score').textContent = score;
+            document.getElementById('score-ring').style.strokeDashoffset = String(circumference * (1 - score / 100));
+            document.getElementById('hero-rank-line').innerHTML =
+                `Estimated rank: <span class="font-bold text-primary">${Api.approxRankLabel(score)}</span> <span class="opacity-60">(approximate, based on your score band)</span>`;
+
+            document.getElementById('job-fit-label').textContent = score >= 80 ? 'High' : score >= 60 ? 'Moderate' : 'Low';
+            document.getElementById('ats-rank-label').textContent = Api.approxRankLabel(score);
+
+            setMetric('skills', report.skills_score);
+            setMetric('formatting', report.formatting_score);
+            setMetric('keywords', report.keywords_score);
+            setMetric('education', report.education_score);
+            setMetric('projects', report.projects_score);
+
+            const missingDesc = document.getElementById('metric-keywords-desc');
+            missingDesc.textContent = report.missing_keywords.length
+                ? `Missing ${report.missing_keywords.length} keyword${report.missing_keywords.length === 1 ? '' : 's'} found in similar job descriptions.`
+                : 'No missing keywords detected.';
+
+            const lowest = lowestScoringMetric(report);
+            document.getElementById('critical-insight-text').innerHTML = lowest.score >= 90
+                ? `Every metric is scoring well — your <span class="font-bold">${lowest.label.toLowerCase()}</span> score is your highest-leverage area to keep polishing, currently at <span class="text-secondary font-bold">${Math.round(lowest.score)}/100</span>.`
+                : `Your <span class="font-bold">${lowest.label.toLowerCase()}</span> score is your biggest opportunity, currently at <span class="text-secondary font-bold">${Math.round(lowest.score)}/100</span>. Improving it would lift your overall score the most.`;
+            document.getElementById('insight-cta-label').textContent = `Improve ${lowest.label}`;
+
+            const missingListEl = document.getElementById('missing-keywords-list');
+            if (report.missing_keywords.length) {
+                missingListEl.innerHTML = report.missing_keywords
+                    .map(k => `<span class="px-md py-base rounded-full bg-error-container text-on-error-container font-label-md text-label-md">${escapeHtml(k)}</span>`)
+                    .join('');
+            } else {
+                missingListEl.innerHTML = '<span class="text-on-surface-variant text-body-sm">None — nice work.</span>';
+            }
+        }
+
+        function setMetric(key, value) {
+            const score = Math.round(value);
+            document.getElementById(`metric-${key}-pct`).textContent = `${score}%`;
+            document.getElementById(`metric-${key}-bar`).style.width = `${Math.min(100, score)}%`;
+        }
+
+        function lowestScoringMetric(report) {
+            const metrics = [
+                { label: 'Skills', score: report.skills_score },
+                { label: 'Formatting', score: report.formatting_score },
+                { label: 'Keywords', score: report.keywords_score },
+                { label: 'Education', score: report.education_score },
+                { label: 'Projects', score: report.projects_score },
+            ];
+            return metrics.reduce((min, m) => (m.score < min.score ? m : min), metrics[0]);
+        }
+
+        async function runFirstAnalysis() {
+            if (!activeResumeId) { window.location.href = 'dashboard.html'; return; }
+            const btn = document.getElementById('run-first-analysis-btn');
+            btn.textContent = 'Analyzing…';
+            btn.disabled = true;
+            try {
+                await Api.scoreResume(activeResumeId, null);
+                await loadBreakdown();
+            } catch (err) {
+                btn.textContent = 'Run Analysis';
+                btn.disabled = false;
+                document.getElementById('breakdown-error-text').textContent = err.message;
+                document.getElementById('breakdown-error').classList.remove('hidden');
+            }
+        }
+
+        async function rerunAnalysis() {
+            const btn = document.getElementById('rerun-analysis-btn');
+            const original = btn.textContent;
+            btn.textContent = 'Analyzing…';
+            btn.disabled = true;
+            try {
+                await Api.scoreResume(activeResumeId, null);
+                await loadBreakdown();
+            } catch (err) {
+                document.getElementById('breakdown-error-text').textContent = err.message;
+                document.getElementById('breakdown-error').classList.remove('hidden');
+            } finally {
+                btn.textContent = original;
+                btn.disabled = false;
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body></html>

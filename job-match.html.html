@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Match Engine | Aura Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-container-low": "#eff4ff",
+                    "on-secondary-fixed": "#23005c",
+                    "surface-container-high": "#dce9ff",
+                    "outline-variant": "#c7c4d7",
+                    "secondary-fixed": "#e9ddff",
+                    "surface": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "tertiary-container": "#2170e4",
+                    "primary": "#4648d4",
+                    "inverse-primary": "#c0c1ff",
+                    "primary-fixed": "#e1e0ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "outline": "#767586",
+                    "on-surface-variant": "#464554",
+                    "secondary": "#6b38d4",
+                    "on-tertiary-fixed-variant": "#004395",
+                    "on-tertiary-fixed": "#001a42",
+                    "error": "#ba1a1a",
+                    "tertiary": "#0058be",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#fffbff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#07006c",
+                    "on-tertiary-container": "#fefcff",
+                    "tertiary-fixed": "#d8e2ff",
+                    "secondary-container": "#8455ef",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#6063ee",
+                    "surface-dim": "#cbdbf5",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-primary-container": "#fffbff",
+                    "surface-tint": "#494bd6",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-on-surface": "#eaf1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "40px",
+                    "margin-desktop": "48px",
+                    "lg": "24px",
+                    "2xl": "64px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "display-xl": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "display-xl-mobile": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-xl": ["60px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-xl-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            color: #0b1c30;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #4648d4 0%, #6b38d4 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ai-glow {
+            box-shadow: 0 0 20px rgba(70, 72, 212, 0.15);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d3e4fe;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/50 shadow-sm h-16 flex items-center justify-between px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">menu</span>
+<h1 class="font-display-xl-mobile text-display-xl-mobile md:text-headline-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Aura Intelligence</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden md:flex items-center gap-sm px-md py-sm rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span class="font-label-md text-label-md">UPGRADE</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center overflow-hidden cursor-pointer" id="header-avatar" onclick="handleSignOut()" title="Click to sign out">
+<img class="w-full h-full object-cover" data-alt="A professional studio headshot of a young creative professional with a friendly smile, set against a clean, soft-focus minimalist office background. The lighting is bright and airy, reflecting a premium SaaS aesthetic with subtle cool blue and purple undertones. High-end portrait photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ9sH-oMnf2bxj6bkLbG_g8tGs1sS81hebPdcQf1kL0FR5YF1aaBwt7eOxnbaLWpsoO07ehtovk9xkpFLMbJdGfV7izRWaFQHnOpXMb_1QXwd7Ii-f3KECG0Ord1pfGMwURa9iFq6eumI_ccSpsmh_mavqXT1SyCmLZ6nq20n11_I3A4ySWUNkXKQX8CRqEhlUv0bfRknPvLH_E_LSTLJLL2Wwi6RhcA-pZ7YA4CEuTc4tCqV082_CAYWYeselI1E9VmV5QbM3hwJp"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Desktop Only) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-[280px] z-[60] bg-surface/95 backdrop-blur-2xl border-r border-outline-variant/30 flex-col p-md space-y-base shadow-2xl">
+<div class="mb-xl pt-4">
+<h2 class="font-headline-lg text-headline-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-4">Aura</h2>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 rounded-xl transition-transform hover:translate-x-1" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 rounded-xl transition-transform hover:translate-x-1" href="ats-breakdown.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">Resume Analysis</span>
+</a>
+<a class="flex items-center gap-md p-md bg-primary-container text-on-primary-container rounded-xl font-bold transition-transform hover:translate-x-1" href="job-match.html">
+<span class="material-symbols-outlined">target</span>
+<span class="font-body-md">Job Match</span>
+</a>
+</nav>
+<div class="p-md bg-surface-container-low rounded-2xl">
+<div class="flex items-center gap-sm mb-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-md text-label-md text-primary uppercase">ATS Score</span>
+</div>
+<p class="font-headline-sm text-headline-sm"><span id="sidebar-ats-score">—</span> <span class="text-on-surface-variant font-normal text-body-sm">/ 100</span></p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 md:pl-[300px] px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto min-h-screen">
+<!-- Header Section -->
+<section class="mb-xl">
+<div class="max-w-3xl">
+<span class="inline-block px-3 py-1 rounded-full bg-secondary/10 text-secondary font-label-md text-label-md mb-md">MATCH ENGINE 2.0</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-sm">Job Match Analysis</h2>
+<p class="text-on-surface-variant font-body-md">Instantly check how well your resume aligns with a specific job role. Our AI analyzes semantical relevance, technical keywords, and experience depth.</p>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Input Area -->
+<div class="lg:col-span-7 space-y-gutter">
+<!-- Resume Selection -->
+<div class="glass-card rounded-2xl p-lg shadow-sm">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">description</span>
+                            Select Resume
+                        </h3>
+<button class="text-primary font-label-md text-label-md hover:underline" onclick="window.location.href='dashboard.html'">UPLOAD NEW</button>
+</div>
+<div class="relative group">
+<select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-md py-4 font-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none cursor-pointer" id="resume-select">
+<option value="">Loading your resumes…</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Job Description Area -->
+<div class="glass-card rounded-2xl p-lg shadow-sm">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">work_outline</span>
+                            Job Description
+                        </h3>
+</div>
+<textarea class="w-full h-80 bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md font-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none custom-scrollbar" id="job-description-input" placeholder="Paste the job description here to analyze match accuracy..."></textarea>
+<p class="hidden text-error text-body-sm mt-sm" id="job-match-error"></p>
+<div class="mt-lg flex items-center justify-end">
+<button class="primary-gradient text-white px-xl py-md rounded-xl font-headline-sm flex items-center gap-md hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all duration-200" id="analyze-match-btn" onclick="runMatchAnalysis()">
+<span id="analyze-match-label">Analyze Match</span>
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Analysis Sidebar (Pre-state or Results) -->
+<div class="lg:col-span-5">
+<div class="glass-card rounded-3xl p-xl h-full flex flex-col items-center justify-center text-center border-dashed border-2 border-outline-variant/50" id="result-placeholder">
+<div class="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-primary text-[40px] animate-pulse">analytics</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface-variant mb-sm">Ready for Analysis</h4>
+<p class="text-on-surface-variant/70 text-body-sm max-w-[240px]">Select your resume and paste a job description to see your Aura Match score.</p>
+</div>
+<!-- Result View -->
+<div class="hidden space-y-gutter" id="analysis-results">
+<!-- Score Card -->
+<div class="glass-card rounded-3xl p-xl shadow-xl ai-glow">
+<div class="flex flex-col items-center text-center">
+<div class="relative w-48 h-48 mb-lg flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-high" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="transition-all duration-[1500ms] ease-out" cx="96" cy="96" fill="transparent" id="match-score-ring" r="88" stroke="url(#scoreGradient)" stroke-dasharray="552.92" stroke-dashoffset="552.92" stroke-linecap="round" stroke-width="12"></circle>
+<defs>
+<lineargradient id="scoreGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#4648d4"></stop>
+<stop offset="100%" stop-color="#6b38d4"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-xl text-[56px] text-primary" id="match-score-value">—%</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Match Score</span>
+</div>
+</div>
+<div class="inline-flex items-center gap-sm px-4 py-2 rounded-full bg-tertiary/10 text-tertiary mb-md">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="font-label-md text-label-md" id="match-potential-label">ANALYZED</span>
+</div>
+<p class="text-body-sm text-on-surface-variant" id="match-summary-text">&nbsp;</p>
+</div>
+</div>
+<!-- Missing Keywords -->
+<div class="glass-card rounded-2xl p-lg shadow-sm">
+<h4 class="font-headline-sm text-headline-sm mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-error">warning</span>
+                            Missing Keywords
+                        </h4>
+<div class="flex flex-wrap gap-sm" id="match-missing-keywords">
+</div>
+</div>
+<!-- Recommended Improvements -->
+<div class="glass-card rounded-2xl p-lg shadow-sm">
+<h4 class="font-headline-sm text-headline-sm mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">tips_and_updates</span>
+                            AI Insights
+                        </h4>
+<div class="space-y-md" id="match-ai-insights">
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex justify-around items-center h-20 pb-safe px-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-150" href="dashboard.html">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-150" href="ats-breakdown.html">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-md text-label-md">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary scale-110 active:scale-90 duration-150" href="job-match.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">travel_explore</span>
+<span class="font-label-md text-label-md">Match</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/30 cursor-not-allowed duration-150" href="#" onclick="return false;" title="Coming soon">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md text-label-md">AI Coach</span>
+</a>
+</nav>
+<script>
+        const Api = window.SmartATSApi;
+        let resumesById = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!Api.isLoggedIn()) {
+                window.location.href = 'landing.html';
+                return;
+            }
+            await Promise.all([populateResumeSelect(), loadSidebarScore()]);
+        });
+
+        function handleSignOut() {
+            Api.logout();
+            window.location.href = 'landing.html';
+        }
+
+        async function populateResumeSelect() {
+            const select = document.getElementById('resume-select');
+            try {
+                const resp = await Api.listResumes();
+                const list = resp.resumes || [];
+                resumesById = Object.fromEntries(list.map(r => [r.id, r]));
+
+                if (!list.length) {
+                    select.innerHTML = '<option value="">No resumes uploaded yet</option>';
+                    return;
+                }
+
+                select.innerHTML = list
+                    .map(r => `<option value="${r.id}">${escapeHtml(r.original_filename)} (v${r.version}${r.is_current ? ' • current' : ''})</option>`)
+                    .join('');
+
+                const current = list.find(r => r.is_current);
+                if (current) select.value = current.id;
+            } catch (err) {
+                select.innerHTML = '<option value="">Couldn\'t load resumes</option>';
+                showJobMatchError(err.message);
+            }
+        }
+
+        async function loadSidebarScore() {
+            try {
+                const resp = await Api.listResumes();
+                const list = resp.resumes || [];
+                const current = list.find(r => r.is_current) || list[0];
+                if (!current) return;
+                const report = await Api.getLatestReport(current.id);
+                if (report) document.getElementById('sidebar-ats-score').textContent = Math.round(report.overall_score);
+            } catch (err) {
+                // Sidebar widget is non-critical — fail silently and leave the placeholder.
+            }
+        }
+
+        function showJobMatchError(message) {
+            const el = document.getElementById('job-match-error');
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+
+        function hideJobMatchError() {
+            document.getElementById('job-match-error').classList.add('hidden');
+        }
+
+        async function runMatchAnalysis() {
+            hideJobMatchError();
+            const resumeId = document.getElementById('resume-select').value;
+            const jobDescription = document.getElementById('job-description-input').value.trim();
+
+            if (!resumeId) {
+                showJobMatchError('Select a resume first.');
+                return;
+            }
+            if (!jobDescription) {
+                showJobMatchError('Paste a job description to match against.');
+                return;
+            }
+
+            const btn = document.getElementById('analyze-match-btn');
+            const label = document.getElementById('analyze-match-label');
+            btn.disabled = true;
+            btn.classList.add('opacity-80');
+            label.textContent = 'Analyzing…';
+
+            try {
+                const report = await Api.scoreResume(resumeId, jobDescription);
+                renderMatchResults(report);
+
+                document.getElementById('result-placeholder').classList.add('hidden');
+                document.getElementById('analysis-results').classList.remove('hidden');
+
+                if (window.innerWidth < 1024) {
+                    document.getElementById('analysis-results').scrollIntoView({ behavior: 'smooth' });
+                }
+
+                document.getElementById('sidebar-ats-score').textContent = Math.round(report.overall_score);
+            } catch (err) {
+                showJobMatchError(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-80');
+                label.textContent = 'Analyze Match';
+            }
+        }
+
+        function renderMatchResults(report) {
+            const score = Math.round(report.overall_score);
+            const circumference = 552.92; // matches this ring's stroke-dasharray
+
+            document.getElementById('match-score-value').textContent = `${score}%`;
+            document.getElementById('match-score-ring').style.strokeDashoffset = String(circumference * (1 - score / 100));
+
+            const potentialLabel = score >= 80 ? 'STRONG POTENTIAL' : score >= 60 ? 'GOOD POTENTIAL' : 'NEEDS WORK';
+            document.getElementById('match-potential-label').textContent = potentialLabel;
+
+            document.getElementById('match-summary-text').textContent = report.missing_keywords.length
+                ? `Your resume scores ${score}/100 against this job description. ${report.missing_keywords.length} key term${report.missing_keywords.length === 1 ? '' : 's'} from the listing ${report.missing_keywords.length === 1 ? "wasn't" : "weren't"} found in your resume.`
+                : `Your resume scores ${score}/100 against this job description, with no missing keywords detected.`;
+
+            const keywordsEl = document.getElementById('match-missing-keywords');
+            keywordsEl.innerHTML = report.missing_keywords.length
+                ? report.missing_keywords.map(k => `
+                    <span class="px-md py-base rounded-full bg-error-container text-on-error-container font-label-md text-label-md">
+                        ${escapeHtml(k)}
+                    </span>`).join('')
+                : '<span class="text-on-surface-variant text-body-sm">None — every key term was found.</span>';
+
+            const insightsEl = document.getElementById('match-ai-insights');
+            insightsEl.innerHTML = report.ai_suggestions.length
+                ? report.ai_suggestions.map(s => `
+                    <div class="flex gap-md p-md rounded-xl bg-surface-container-low">
+                        <span class="material-symbols-outlined text-primary mt-1">lightbulb</span>
+                        <p class="text-body-sm text-on-surface-variant">${escapeHtml(s)}</p>
+                    </div>`).join('')
+                : '<p class="text-body-sm text-on-surface-variant">No specific suggestions for this match.</p>';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Sidebar link highlight (purely visual; navigation itself uses real hrefs now)
+        document.querySelectorAll('aside nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                document.querySelectorAll('aside nav a').forEach(l => {
+                    l.className = "flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 rounded-xl transition-transform hover:translate-x-1";
+                });
+                link.className = "flex items-center gap-md p-md bg-primary-container text-on-primary-container rounded-xl font-bold transition-transform hover:translate-x-1";
+            });
+        });
+    </script>
+</body></html>
